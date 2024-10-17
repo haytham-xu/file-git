@@ -3,6 +3,7 @@ import os
 import re
 import json
 import shutil
+import hashlib
 
 # file/folder operation
 # ---------------------------------------------------------------------------------------
@@ -12,6 +13,14 @@ def create_folder(folder_path):
 
 def create_file(file_path):
     open(file_path, 'w').close()
+
+def copy_file_folder(source_path, target_path):
+    shutil.copytree(source_path, target_path)
+
+def move_file_folder(source_path, target_path):
+    parent_path = os.path.split(source_path)[0]
+    create_folder(parent_path)
+    shutil.move(source_path, target_path)
 
 def delete_path(path):
     if is_exist(path):
@@ -27,6 +36,14 @@ def write_file_byte(file_path:str, content):
 
 # path operation
 # ---------------------------------------------------------------------------------------
+def get_middle_path_and_hash(file_path:str, root_path:str):
+    middle_path = os.path.relpath(file_path, root_path)
+    middle_path_hash = get_string_hash(middle_path)
+    return middle_path, middle_path_hash
+
+def get_string_hash(source_string:str):
+    return hashlib.md5(source_string.encode()).hexdigest()
+
 def is_exist(file_folder_path):
     return os.path.exists(file_folder_path) 
 
@@ -50,3 +67,7 @@ def read_json_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
     return data
+
+def write_json_file(file_path, data):
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)

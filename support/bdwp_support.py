@@ -39,6 +39,12 @@ class BaiduWangPan:
 
     # token operation
     # ---------------------------------------------------------------------------------------
+    def refresh_token(self, refresh_token, app_key, secret_key):
+        params = {"grant_type": "refresh_token", "refresh_token":refresh_token, "client_id":app_key, "client_secret":secret_key}
+        res = self.http_request(self.oauth_url, "GET", self.headers, params)
+        json_result = res.json()
+        res.close()
+        return json_result
 
     # file operation - upload
     # ---------------------------------------------------------------------------------------

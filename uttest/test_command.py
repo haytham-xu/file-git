@@ -55,7 +55,7 @@ class TestCommand(AbstractTestCase):
         test_config_key = "access_token"
         test_config_value = "new_access_token"
         # execute
-        Hooks.execute()
+        Hooks.base_hook()
         command_set_config(test_config_key, test_config_value)
         # assert
         config_instance.read_config(constant_instance.get_config_file_path())

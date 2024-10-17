@@ -146,11 +146,11 @@
         |__index
             |__local.json: scan all local file
             |__remote.json: get all info from API
-        |__buffer
-            |__xxxx.txt
         |__log    
             |__error.json
             |__success.json
+|__buffer
+    |__xxxx.txt
 |__config.json
 |__queue.json
 ```
@@ -173,15 +173,17 @@
 ```json
 {
     "lock": true,
-    "queue": [
-        {
+    "key_set": [],
+    "action_folder": "",
+    "queue": {
+        "HASH_1": {
             "local_middle_path": "x",
             "remote_middle_path": "x",
             "action": "UPDATE/DELTE",
             "status": "TODO/IN_PROGRESS/ERROR"
         },
         {}
-    ]
+    }
 }
 ```
 

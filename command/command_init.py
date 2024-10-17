@@ -4,6 +4,7 @@ from support.config_support import Mode
 from support import file_support
 from support.constant_support import constant_instance
 from support.config_support import config_instance
+from support.queue_support import queue_instance
 
 def command_init(mode, password, local_path, remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token):
     # create folder trash
@@ -29,3 +30,5 @@ def command_init(mode, password, local_path, remote_path, app_id, secret_key, ap
     config_instance.set_refresh_token(refresh_token)
     config_instance.set_access_token(access_token)
     config_instance.write_config(constant_instance.get_config_file_path())
+
+    queue_instance.write_queue(constant_instance.get_queue_file_path())
