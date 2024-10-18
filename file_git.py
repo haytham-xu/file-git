@@ -32,7 +32,6 @@ def init():
     refresh_token = click.prompt('Please enter the refresh_token', default=os.getenv("BDWP_REFRESH_TOKEN", ""))
     access_token = click.prompt('Please enter the access_token', default=os.getenv("BDWP_ACCESS_TOKEN", ""))
 
-    Hooks.init_constant()
     command_init(mode, password, local_path, remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
 
 @click.command()

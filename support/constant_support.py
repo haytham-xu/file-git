@@ -3,7 +3,7 @@ from support import file_support
 
 class Constant():
     
-    def __init__(self, local_path="", file_git_foler_name=".fgit", trash_folder_name="trash", action_folder_name="action", buffer_folder_name="", queue_file_name="queue.json", config_file_name="config.json"):
+    def __init__(self, local_path="", file_git_foler_name=".fgit", trash_folder_name="trash", action_folder_name="action", buffer_folder_name="buffer", queue_file_name="queue.json", config_file_name="config.json"):
         self.local_path = local_path
         self.file_git_foler_name = file_git_foler_name
         self.trash_folder_name = trash_folder_name
@@ -57,6 +57,8 @@ class Constant():
         return self.trash_folder_name
     def get_action_folder_name(self):
         return self.action_folder_name
+    def get_buffer_folder_name(self):
+        return self.buffer_folder_name
     def get_queue_file_name(self):
         return self.queue_file_name
     def get_config_file_name(self):

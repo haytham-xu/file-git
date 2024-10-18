@@ -22,6 +22,9 @@
 * 应该支持命令verify（甚至verify是不是也应该封装成一个函数）
 * 每个命令执行前买应该有一个检查fgit文件夹的hook
 
+* action的日期应该还是带上“时分”
+* test code should only used in test code, espcially for data prepare.
+
 
 #### 1-2 需求梳理(最后应该是满的)()
 * r01: 大面积文件操作, 这会花费大量的时间、可能一次无法完成, 对于一个文件, 可能上传成功, 也可能上传失败, 失败可能就是单纯的失败, 也可能是文件名称不对等问题, 或者文件过大超时

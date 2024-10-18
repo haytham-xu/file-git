@@ -1,17 +1,23 @@
 
-from support.config_support import Mode
 
+from hook.hook import Hooks
+
+from support.config_support import Mode
 from support import file_support
 from support.constant_support import constant_instance
 from support.config_support import config_instance
 from support.queue_support import queue_instance
 
 def command_init(mode, password, local_path, remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token):
+
+    Hooks.init_constant()
+
     # create folder trash
     # create folder action
     file_support.create_folder(constant_instance.get_file_git_folder_path())
     file_support.create_folder(constant_instance.get_trash_folder_path())
     file_support.create_folder(constant_instance.get_action_folder_path())
+    file_support.create_folder(constant_instance.get_buffer_folder_path())
 
     # create file config_instance.json
     # create file queue.json
@@ -31,4 +37,6 @@ def command_init(mode, password, local_path, remote_path, app_id, secret_key, ap
     config_instance.set_access_token(access_token)
     config_instance.write_config(constant_instance.get_config_file_path())
 
-    queue_instance.write_queue(constant_instance.get_queue_file_path())
+    Hooks.init_queue_file_path()
+    queue_instance.write_queue()
+    Hooks.init_queue_instance()

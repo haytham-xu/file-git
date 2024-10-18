@@ -3,7 +3,6 @@ import json
 
 from support import file_support
 from support.constant_support import constant_instance
-# from support.config_support import config_instance
 
 def command_set_config(key, value):
     current_config = file_support.read_json_file(constant_instance.get_config_file_path())

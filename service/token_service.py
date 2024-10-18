@@ -11,7 +11,7 @@ def refresh_token():
     app_key = config_instance.get_app_key()
     secret_key = config_instance.get_secret_key()
     res = bdwp_instance.refresh_token(refresh_token, app_key, secret_key)
-    print("==> ", res)
+    print("==> refresh_token", res)
     access_token = res['access_token']
     refresh_token = res['refresh_token']
     expire_in = res['expires_in']

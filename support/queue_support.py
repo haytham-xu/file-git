@@ -6,16 +6,16 @@ from typing import List, Dict
 from support import file_support
 
 class Status(Enum):
-    PENDING = 1
-    IN_PROGRESS = 2
-    COMPLETED = 3
-    FAILED = 4
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
 
 class Action(Enum):
-    DOWNLOAD = 1
-    UPLOAD = 2
-    LOCAL_DELETE = 3
-    REMOTE_DELETE = 4
+    DOWNLOAD = "DOWNLOAD"
+    UPLOAD = "UPLOAD"
+    LOCAL_DELETE = "LOCAL_DELETE"
+    REMOTE_DELETE = "REMOTE_DELETE"
 
 class QueueItem:
     def __init__(self, middle_path:str="", action:Action=None, status:Status=Status.PENDING):
@@ -36,12 +36,12 @@ class QueueItem:
     def set_status(self, status):
         self.status = status
 
-    def from_json():
+    def from_json(self, item):
         pass
 
     def to_json(self):
         return json.dumps({
-            'middle_path': self.remote_middle_path,
+            'middle_path': self.middle_path,
             'action': self.action.value,
             'status': self.status.value
         })
@@ -52,7 +52,12 @@ class QueueManager:
         self.key_set: List[str] = []
         self.queue_item: Dict[QueueItem] = {}
         self.action_folder = ""
+        self.queue_file_path = ""
 
+    def get_queue_item(self):
+        return self.queue_item
+    def get_key_set(self):
+        return self.key_set
     def is_lock(self):
         return self.lock
     def acquire_lock(self):
@@ -61,19 +66,28 @@ class QueueManager:
     def release_lock(self):
         if self.lock != False:
             self.lock = False
-    def is_queue_empty(self): 
-        return len(self.queue_item) == 0
+            self.action_folder = None
+            self.write_queue()
+    def is_queue_empty(self):
+        pending_count = sum(1 for item in self.queue_item.values() if item.get_status() == Status.PENDING)
+        return pending_count == 0
     
     def set_action_folder(self, action_folder):
         self.action_folder = action_folder
     def get_action_folder(self):
         return self.action_folder
+    def get_queue_file_path(self):
+        return self.queue_file_path
+    def set_queue_file_path(self, queue_file_path):
+        self.queue_file_path = queue_file_path
     
     def get_a_queue_item(self):
-        a_key = self.key_set[-1]
-        a_queue_item = self.queue_item[a_key]
-        a_queue_item.status = Status.IN_PROGRESS
-        return a_key, a_queue_item
+        for a_key in self.key_set:
+            a_queue_item:QueueItem = self.queue_item[a_key]
+            if a_queue_item.get_status() == Status.PENDING:
+                a_queue_item.set_status(Status.IN_PROGRESS)
+                return a_key, a_queue_item
+        raise ValueError("No queue item is in PENDING status.")
     
     def add_queue_item(self, key:str, queue_item: QueueItem):
         self.key_set.append(key)
@@ -87,18 +101,18 @@ class QueueManager:
         a_queue_item:QueueItem = self.queue_item[a_key]
         a_queue_item.set_status(status)
 
-    def read_queue(self, queue_file_path):
-        if not file_support.is_exist(queue_file_path):
-            raise FileNotFoundError(f"queue_instance file '{queue_file_path}' does not exist.")
-        with open(queue_file_path, 'r') as file:
+    def read_queue(self):
+        if not file_support.is_exist(self.get_queue_file_path()):
+            raise FileNotFoundError(f"queue_instance file '{self.get_queue_file_path()}' does not exist.")
+        with open(self.get_queue_file_path(), 'r') as file:
             data = json.load(file)
             self.lock = data['lock']
             self.key_set = data['key_set']
             self.action_folder = data['action_folder']
             self.queue_item = {key: QueueItem.from_json(item) for key, item in data['queue_item'].items()}
 
-    def write_queue(self, queue_file_path):
-        with open(queue_file_path, 'w') as file:
+    def write_queue(self):
+        with open(self.get_queue_file_path(), 'w') as file:
             json.dump({
                 'lock': self.lock,
                 'action_folder': self.action_folder,

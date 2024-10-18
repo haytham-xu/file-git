@@ -50,8 +50,12 @@ class Hooks:
         bdwp_instance.set_access_token(config_instance.get_access_token())
 
     @staticmethod
-    def init_queue():
-        queue_instance.read_queue(constant_instance.get_queue_file_path())
+    def init_queue_file_path():
+        queue_instance.set_queue_file_path(constant_instance.get_queue_file_path())
+
+    @staticmethod
+    def init_queue_instance():
+        queue_instance.read_queue()
 
     @staticmethod
     def check_queue_lock():

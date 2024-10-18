@@ -1,25 +1,19 @@
 
-from facade import verify_facade
+from facade import index_facade
+from facade import push_facade
 
 from datetime import datetime
 from support import file_support
 from support.constant_support import constant_instance
 from support.config_support import config_instance
+from support import time_support
 
-from facade import index_facade
-from facade import push_facade
-from facade import queue_facade
-
-from support.queue_support import Action, queue_instance
-
+action_name = "verify"
 
 def command_verify():
-    now = datetime.now()
-    timestamp = now.strftime("%Y%m%d%H%M")
-    action_name = "verify"
 
-    current_action_folder_path = "{}_{}".format(timestamp, action_name)
-    current_action_folder_path = file_support.merge_path(constant_instance.get_action_folder_path(), current_action_folder_path)
+    current_action_folder_name = time_support.get_action_folder_name(action_name)
+    current_action_folder_path = file_support.merge_path(constant_instance.get_action_folder_path(), current_action_folder_name)
     file_support.create_folder(current_action_folder_path)
 
     current_action_index_path = file_support.merge_path(current_action_folder_path, "index")
@@ -55,17 +49,17 @@ def generate_diff_report(only_in_local_json, only_in_cloud_json, local_cloud_dif
         report_file.write("Only in Local:\n")
         report_file.write("-" * 40 + "\n")
         for _, value in only_in_local_json.items():
-            report_file.write(f"LOCAL: {value["middle_path"]}\n")
+            report_file.write(f"LOCAL: {value['middle_path']}\n")
         report_file.write("\n")
         
         report_file.write("Only in Cloud:\n")
         report_file.write("-" * 40 + "\n")
         for _, value in only_in_cloud_json.items():
-            report_file.write(f"CLOUD: {value["middle_path"]}\n")
+            report_file.write(f"CLOUD: {value['middle_path']}\n")
         report_file.write("\n")
         
         report_file.write("Local vs Cloud Differences:\n")
         report_file.write("-" * 40 + "\n")
         for _, value in local_cloud_diff_json.items():
-            report_file.write(f"DIFF: local {value["middle_path"]}\n")
+            report_file.write(f"DIFF: local {value['middle_path']}\n")
         report_file.write("\n")

@@ -12,10 +12,18 @@ def create_folder(folder_path):
         os.makedirs(folder_path)
 
 def create_file(file_path):
+    parent_path = os.path.split(file_path)[0]
+    create_folder(parent_path)
     open(file_path, 'w').close()
 
 def copy_file_folder(source_path, target_path):
-    shutil.copytree(source_path, target_path)
+    if os.path.isdir(source_path):
+        shutil.copytree(source_path, target_path)
+    else:
+        target_dir = os.path.dirname(target_path)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        shutil.copy(source_path, target_path)
 
 def move_file_folder(source_path, target_path):
     parent_path = os.path.split(source_path)[0]
