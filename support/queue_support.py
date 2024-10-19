@@ -36,8 +36,15 @@ class QueueItem:
     def set_status(self, status):
         self.status = status
 
-    def from_json(self, item):
-        pass
+    @staticmethod
+    def from_json(item):
+        return QueueItem(
+            middle_path=item['middle_path'],
+            action=Action(item['action']),
+            status=Status(item['status'])
+        )
+
+
 
     def to_json(self):
         return json.dumps({

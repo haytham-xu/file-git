@@ -14,14 +14,14 @@ def get_only_in_remote(local_index_json, cloud_index_json):
 
 def get_local_remote_diff(local_index_json, cloud_index_json):
     diff = {}
-    for key, local_value in local_index_json.items():
-        if key in cloud_index_json:
-            cloud_value = cloud_index_json[key]
-            if local_value['size'] != cloud_value['size']:
-                diff[key] = {
-                    'local': local_value,
-                    'remote': cloud_value
-                }
+    # for key, local_value in local_index_json.items():
+    #     if key in cloud_index_json:
+    #         cloud_value = cloud_index_json[key]
+    #         if local_value['size'] != cloud_value['size']:
+    #             diff[key] = {
+    #                 'local': local_value,
+    #                 'remote': cloud_value
+    #             }
     return diff
 
 def handle_index_json(index_json, action):

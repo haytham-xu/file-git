@@ -6,6 +6,7 @@ from PIL import Image
 from support import file_support
 from hook.hook import Hooks
 from command.command_init import command_init
+from command.command_clone import command_clone
 from support.bdwp_support import bdwp_instance
 from support.config_support import Mode
 from support.constant_support import constant_instance
@@ -94,6 +95,9 @@ def create_image(size, output_path):
 
 def run_command_init(fgit_mode):
     command_init(fgit_mode, fgit_password, fgit_local_path, fgit_remote_path, fgit_app_id, fgit_secret_key, fgit_app_key, fgit_sign_code, fgit_expires_in, fgit_refresh_token, fgit_access_token)
+
+def run_command_clone(fgit_mode):
+    command_clone(fgit_mode, fgit_password, fgit_local_path, fgit_remote_path, fgit_app_id, fgit_secret_key, fgit_app_key, fgit_sign_code, fgit_expires_in, fgit_refresh_token, fgit_access_token)
 
 def create_file_in_remote(local_file_path, cloud_file_path, file_type):
     if file_type == 'txt':

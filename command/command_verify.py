@@ -36,10 +36,15 @@ def command_verify():
 
     report_file_path = file_support.merge_path(current_action_folder_path, "report.json")
 
-    generate_diff_report(only_in_local_json, only_in_cloud_json, local_cloud_diff_json, report_file_path)
+    return generate_diff_report(only_in_local_json, only_in_cloud_json, local_cloud_diff_json, report_file_path)
 
     
 def generate_diff_report(only_in_local_json, only_in_cloud_json, local_cloud_diff_json, report_file_path):
+
+    if len(only_in_local_json) == 0 and len(only_in_cloud_json) == 0 and len(local_cloud_diff_json) == 0:
+        print("No differences found.")
+        return False
+
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     with open(report_file_path, 'w') as report_file:
@@ -61,5 +66,7 @@ def generate_diff_report(only_in_local_json, only_in_cloud_json, local_cloud_dif
         report_file.write("Local vs Cloud Differences:\n")
         report_file.write("-" * 40 + "\n")
         for _, value in local_cloud_diff_json.items():
-            report_file.write(f"DIFF: local {value['middle_path']}\n")
+            report_file.write(f"DIFF: local {value['local']['middle_path']} remote {value['remote']['middle_path']}\n")
         report_file.write("\n")
+
+    return True
