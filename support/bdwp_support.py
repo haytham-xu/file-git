@@ -24,7 +24,7 @@ class BaiduWangPan:
     # base
     # ---------------------------------------------------------------------------------------
     def http_request(self, url, method, headers, params={}, payload={}, files={}):
-        res = requests.request(method, url, params=params, headers=self.headers, data = payload, files = files, timeout=360)
+        res = requests.request(method, url, params=params, headers=headers, data = payload, files = files, timeout=360)
         time.sleep(1)
         if res.status_code == 200:
             return res
@@ -32,7 +32,7 @@ class BaiduWangPan:
 
     def bdwp_request_with_token(self, url, method, headers={}, params={}, payload={} ,files=[]):
         params["access_token"] = self.access_token
-        res = self.http_request(url, method, self.headers, params, payload ,files)
+        res = self.http_request(url, method, headers, params, payload ,files)
         json_result = res.json()
         res.close()
         return json_result
@@ -49,6 +49,7 @@ class BaiduWangPan:
     # file operation - upload
     # ---------------------------------------------------------------------------------------
     def pre_upload(self, cloud_path, file_size, md5_list):
+        cloud_path = file_support.convert_to_unix_path(cloud_path)
         pre_create_url = self.base_url + "/rest/2.0/xpan/file"
         block_list = json.dumps(md5_list)
         payload = {'path': cloud_path, 'size': file_size, 'block_list': block_list, 'isdir': '0', 'autoinit': '1', 'rtype': '3'}
@@ -58,6 +59,7 @@ class BaiduWangPan:
         return upload_id
 
     def upload_chunk(self, upload_id, chunk_content, chunk_id, cloud_path):
+        cloud_path = file_support.convert_to_unix_path(cloud_path)
         upload_url = "https://d.pcs.baidu.com/rest/2.0/pcs/superfile2"
         payload = {}
         files = [('file', chunk_content)]
@@ -65,6 +67,7 @@ class BaiduWangPan:
         self.bdwp_request_with_token(upload_url, "POST", self.headers, params, payload, files)
 
     def create_file(self, cloud_path, upload_id, md5_list, file_size):
+        cloud_path = file_support.convert_to_unix_path(cloud_path)
         create_url = self.base_url + "/rest/2.0/xpan/file"
         block_list = json.dumps(md5_list)
         payload = {'path': cloud_path, 'size': file_size, 'uploadid': upload_id, 'block_list': block_list, 'rtype': '3', 'isdir': '0'}
@@ -74,6 +77,7 @@ class BaiduWangPan:
         return fs_id
 
     def upload_file(self, file_local_path, target_absolute_path):
+        target_absolute_path = file_support.convert_to_unix_path(target_absolute_path)
         file_size = os.path.getsize(file_local_path)
         file_block = []
         md5_list = []
@@ -98,6 +102,7 @@ class BaiduWangPan:
     # file operation - download
     # ---------------------------------------------------------------------------------------
     def download_file_with_path(self, cloud_download_absolute_path, local_download_absolute_path):
+        cloud_download_absolute_path = file_support.convert_to_unix_path(cloud_download_absolute_path)
         file_name = file_support.get_file_folder_name(cloud_download_absolute_path)
         cloud_file_parent_path = file_support.get_file_folder_parent_path(cloud_download_absolute_path)
         res = self.search_file(file_name, cloud_file_parent_path)
@@ -118,18 +123,22 @@ class BaiduWangPan:
     # file/folder operation - deltete
     # ---------------------------------------------------------------------------------------
     def create_folder(self, cloud_absolute_path):
+        cloud_absolute_path = file_support.convert_to_unix_path(cloud_absolute_path)
         url = self.base_url + "/rest/2.0/xpan/file"
         params = {"method": "create"}
         payload = {'path': cloud_absolute_path, 'rtype': '1', 'isdir': '1'}
         return self.bdwp_request_with_token(url, "POST", self.headers, params, payload)
 
     def delete_file_folder(self, cloud_absolute_path):
+        cloud_absolute_path = file_support.convert_to_unix_path(cloud_absolute_path)
         url = self.base_url + "/rest/2.0/xpan/file"
         params = {"method": "filemanager", "opera": "delete"}
         payload = {"async": "0", "filelist": json.dumps([{'path': cloud_absolute_path}])}
         return self.bdwp_request_with_token(url, "POST", self.headers, params, payload)
 
     def move_file_folder(self, cloud_source_file_path, cloud_target_folder_path, file_name=None):
+        cloud_source_file_path = file_support.convert_to_unix_path(cloud_source_file_path)
+        cloud_target_folder_path = file_support.convert_to_unix_path(cloud_target_folder_path)
         if file_name is None:
             file_name = file_support.get_file_folder_name(cloud_source_file_path)
         url = self.base_url + "/rest/2.0/xpan/file"
@@ -151,6 +160,7 @@ class BaiduWangPan:
         return self.bdwp_request_with_token(url, "GET", self.headers, params)
 
     def list_folder_file_recursion(self, target_path):
+        target_path = file_support.convert_to_unix_path(target_path)
         limitation = 1000
         current_index = 0
         folder_list = []
@@ -170,6 +180,7 @@ class BaiduWangPan:
         return folder_list, file_list
 
     def get_multimedia_listall(self, target_cloud_absolute_path, start=0, limit=1000):
+        target_cloud_absolute_path = file_support.convert_to_unix_path(target_cloud_absolute_path)
         url = self.base_url + "/rest/2.0/xpan/multimedia"
         params = {"method": "listall", "path": target_cloud_absolute_path, "web": 0, "recursion": 1, "start": start, "limit": limit}
         return self.bdwp_request_with_token(url, "GET", self.headers, params)
