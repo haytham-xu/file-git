@@ -26,7 +26,7 @@ def copy_file_folder(source_path, target_path):
         shutil.copy(source_path, target_path)
 
 def move_file_folder(source_path, target_path):
-    parent_path = os.path.split(source_path)[0]
+    parent_path = os.path.split(target_path)[0]
     create_folder(parent_path)
     shutil.move(source_path, target_path)
 
@@ -68,6 +68,11 @@ def merge_path(*path_segments):
         path_list.extend(parts)
     path_list = [p for p in path_list if p]
     return os.path.sep + os.path.join(*path_list)
+
+def convert_to_unix_path(a_path:str):
+    normalized_path = os.path.normpath(a_path)
+    components = normalized_path.split(os.sep)
+    return "/".join(components)
 
 # json/yaml operation
 # ---------------------------------------------------------------------------------------

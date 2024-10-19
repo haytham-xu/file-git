@@ -10,7 +10,7 @@ from support import file_support
 from support.constant_support import constant_instance
 
 from support.bdwp_support import bdwp_instance
-from command import command_push
+from command import command_pull
 
 
 from service import file_service
@@ -29,7 +29,7 @@ class TestCommandPush(AbstractTestCase):
         file_support.create_folder(test_support.local_test_root_folder)
 
     @patch('os.getcwd')
-    def test_command_push_original(self, mock_getcwd):
+    def test_command_pull_original(self, mock_getcwd):
         # mocking
         mock_getcwd.return_value = test_support.local_test_root_folder
         test_support.run_command_init(test_support.original_fgit_mode)
@@ -42,11 +42,11 @@ class TestCommandPush(AbstractTestCase):
 
         Hooks.base_hook()
         Hooks.clean_trash()
-        command_push.command_push()
+        command_pull.command_pull()
 
         queue_instance.read_queue()
         today_ymd = time_support.get_time_with_ymd()
-        current_action_folder_name = time_support.get_action_folder_name("push")
+        current_action_folder_name = time_support.get_action_folder_name("pull")
 
         local_today_trash_folder_path = file_support.merge_path(constant_instance.get_trash_folder_path(), today_ymd)
         remote_today_trash_folder_path = file_support.merge_path(config_instance.get_remote_path(), ".trash", today_ymd)
@@ -55,16 +55,18 @@ class TestCommandPush(AbstractTestCase):
         local_log_folder_path = file_support.merge_path(current_action_folder_path, "log")
         success_log_file_path = file_support.merge_path(local_log_folder_path, "success.log")
         error_log_file_path = file_support.merge_path(local_log_folder_path, "error.log")
-        
+
         # assert local files
         assert test_support.count_file(test_support.local_test_root_folder) == 3
         # asert cloud files
         assert len(index_facade.get_cloud_index(config_instance.get_remote_path())) == 3
         # assert local trash    
-        assert test_support.count_file(local_today_trash_folder_path) == 0
+        assert test_support.count_file(local_today_trash_folder_path) == 3
         # assert remote trash
-        res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
-        assert len(res) == 3
+        # file_service.
+        # res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
+        # assert len(res) == 0
+        assert file_service.is_file_exist_in_cloud(remote_today_trash_folder_path) == False
         # assert buffer folder
         assert test_support.count_file(constant_instance.get_buffer_folder_path()) == 0
 
@@ -79,9 +81,10 @@ class TestCommandPush(AbstractTestCase):
         assert test_support.count_lines_in_file(success_log_file_path) == 6
 
     @patch('os.getcwd')
-    def test_command_push_encrypted(self, mock_getcwd):
+    def test_command_pull_encrypted(self, mock_getcwd):
         # mocking
         mock_getcwd.return_value = test_support.local_test_root_folder
+        
         test_support.run_command_init(test_support.encrypted_fgit_mode)
         test_support.create_file_in_remote(test_support.test_file_txt_1_local_path, test_support.test_file_txt_1_cloud_path, "txt")
         test_support.create_file_in_remote(test_support.test_file_txt_2_local_path, test_support.test_file_txt_2_cloud_path, "txt")
@@ -92,11 +95,13 @@ class TestCommandPush(AbstractTestCase):
 
         Hooks.base_hook()
         Hooks.clean_trash()
-        command_push.command_push()
+        command_pull.command_pull()
+
+        # input("after command pull...")
 
         queue_instance.read_queue()
         today_ymd = time_support.get_time_with_ymd()
-        current_action_folder_name = time_support.get_action_folder_name("push")
+        current_action_folder_name = time_support.get_action_folder_name("pull")
 
         local_today_trash_folder_path = file_support.merge_path(constant_instance.get_trash_folder_path(), today_ymd)
         remote_today_trash_folder_path = file_support.merge_path(config_instance.get_remote_path(), ".trash", today_ymd)
@@ -105,16 +110,18 @@ class TestCommandPush(AbstractTestCase):
         local_log_folder_path = file_support.merge_path(current_action_folder_path, "log")
         success_log_file_path = file_support.merge_path(local_log_folder_path, "success.log")
         error_log_file_path = file_support.merge_path(local_log_folder_path, "error.log")
-        
+
         # assert local files
         assert test_support.count_file(test_support.local_test_root_folder) == 3
         # asert cloud files
         assert len(index_facade.get_cloud_index(config_instance.get_remote_path())) == 3
         # assert local trash    
-        assert test_support.count_file(local_today_trash_folder_path) == 0
+        assert test_support.count_file(local_today_trash_folder_path) == 3
         # assert remote trash
-        res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
-        assert len(res) == 3
+        # file_service.
+        # res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
+        # assert len(res) == 0
+        assert file_service.is_file_exist_in_cloud(remote_today_trash_folder_path) == False
         # assert buffer folder
         assert test_support.count_file(constant_instance.get_buffer_folder_path()) == 0
 
@@ -132,5 +139,3 @@ class TestCommandPush(AbstractTestCase):
     def tearDown(self):
         bdwp_instance.delete_file_folder(test_support.cloud_test_folder_root_path)
         file_support.delete_path(test_support.local_test_root_folder)
-
-

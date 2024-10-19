@@ -141,6 +141,7 @@ class BaiduWangPan:
     # ---------------------------------------------------------------------------------------
     def search_file(self, search_key, search_in):
         url = self.base_url + "/rest/2.0/xpan/file"
+        search_in = file_support.convert_to_unix_path(search_in)
         params = {"key": search_key, "dir": search_in, "method": "search", "recursion": 1}
         return self.bdwp_request_with_token(url, "GET", self.headers, params)
 

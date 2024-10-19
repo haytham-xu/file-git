@@ -1,5 +1,6 @@
 
 from support import file_support
+from support.config_support import config_instance
 from support.constant_support import constant_instance
 from support import time_support
 
@@ -23,12 +24,12 @@ def command_pull():
     current_action_log_path = file_support.merge_path(current_action_folder_path, "log")
     file_support.create_folder(current_action_log_path)
 
-    local_index_json_path = file_support.merge_path(current_action_folder_path, "local.json")
-    local_index_json = index_facade.get_local_index(local_index_json_path)
+    local_index_json_path = file_support.merge_path(current_action_index_path, "local.json")
+    local_index_json = index_facade.get_local_index(config_instance.get_local_path())
     file_support.write_json_file(local_index_json_path, local_index_json)
 
-    remote_index_json_path = file_support.merge_path(current_action_folder_path, "remote.json")
-    cloud_index_json = index_facade.get_cloud_index(remote_index_json_path)
+    remote_index_json_path = file_support.merge_path(current_action_index_path, "remote.json")
+    cloud_index_json = index_facade.get_cloud_index(config_instance.get_remote_path())
     file_support.write_json_file(remote_index_json_path, cloud_index_json)
 
     only_in_local_json = pull_facade.get_only_in_local(local_index_json, cloud_index_json)

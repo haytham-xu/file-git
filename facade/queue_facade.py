@@ -47,13 +47,15 @@ def trigger():
 
         file_path_in_local = file_support.merge_path(config_instance.get_local_path(), a_queue_item.get_middle_path())
         file_path_in_buffer = buffer_service.get_file_buffer_path(constant_instance.get_buffer_folder_path(), a_queue_item.get_middle_path())
+        file_cloud_path_for_local_use = buffer_service.get_file_cloud_path_for_local_use(config_instance.get_remote_path(), a_queue_item.get_middle_path())
         file_path_in_remote_for_cloud_use = buffer_service.get_file_cloud_path_for_cloud_use(config_instance.get_remote_path(), a_queue_item.get_middle_path())
         try:
             queue_instance.update_queue_item(a_key, Status.IN_PROGRESS)
             if a_queue_item.get_action() == Action.DOWNLOAD:
-                file_service.download_file(file_path_in_remote_for_cloud_use, file_path_in_buffer)
-                buffer_service.move_to_local(file_path_in_buffer)
-                buffer_service.post_move_to_local(file_path_in_buffer)
+                source_file_path_in_buffer = file_support.merge_path(constant_instance.get_buffer_folder_path(), a_queue_item.get_middle_path())
+                file_service.download_file(file_cloud_path_for_local_use, source_file_path_in_buffer)
+                buffer_service.move_to_local(source_file_path_in_buffer)
+                buffer_service.post_move_to_local(source_file_path_in_buffer)
             elif a_queue_item.get_action() == Action.UPLOAD:
                 buffer_service.move_to_buffer(file_path_in_local)
                 file_service.upload_file(file_path_in_buffer, file_path_in_remote_for_cloud_use)
