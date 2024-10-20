@@ -5,12 +5,12 @@ from support.queue_support import Status
 from support import file_support
 
 def get_only_in_local(local_index_json, cloud_index_json):
-    only_in_local = {key: value for key, value in local_index_json.items() if key not in cloud_index_json}
-    return only_in_local
+    only_in_local_json = {key: value for key, value in local_index_json.items() if key not in cloud_index_json}
+    return only_in_local_json
 
 def get_only_in_remote(local_index_json, cloud_index_json):
-    only_in_remote = {key: value for key, value in cloud_index_json.items() if key not in local_index_json}
-    return only_in_remote
+    only_in_remote_json = {key: value for key, value in cloud_index_json.items() if key not in local_index_json}
+    return only_in_remote_json
 
 def get_local_remote_diff(local_index_json, cloud_index_json):
     diff = {}

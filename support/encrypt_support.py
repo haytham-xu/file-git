@@ -10,15 +10,15 @@ from cryptography.hazmat.primitives import padding
 from support import file_support
 
 
-def encode_path(source_path):
-    path_segments = source_path.split(os.sep)
-    encoded_segments = [base64.urlsafe_b64encode(segment.encode()).decode() for segment in path_segments]
-    return os.sep.join(encoded_segments)
+def encode_path(source_virtual_path):
+    virtual_path_segments = source_virtual_path.split("/")
+    virtual_encoded_segments = [base64.urlsafe_b64encode(segment.encode()).decode() for segment in virtual_path_segments]
+    return "/".join(virtual_encoded_segments)
 
-def decode_path(encoded_path):
-    encoded_segments = encoded_path.split(os.sep)
-    decoded_segments = [base64.urlsafe_b64decode(segment.encode()).decode() for segment in encoded_segments]
-    return os.sep.join(decoded_segments)
+def decode_path(encoded_virtual_path):
+    encoded_virtual_segments = encoded_virtual_path.split("/")
+    decoded_virtual_segments = [base64.urlsafe_b64decode(segment.encode()).decode() for segment in encoded_virtual_segments]
+    return "/".join(decoded_virtual_segments)
 
 def generate_key(password: str, salt: bytes) -> bytes:
     kdf = PBKDF2HMAC(
@@ -30,8 +30,10 @@ def generate_key(password: str, salt: bytes) -> bytes:
     )
     return kdf.derive(password.encode())
 
-def encrypt_file(file_path: str, output_path: str, password: str):
-    file_support.create_file(output_path)
+def encrypt_file(file_virtual_path: str, output_virtual_path: str, password: str):
+    file_real_path = file_support.real_local_path_convert(file_virtual_path)
+    output_real_path = file_support.real_local_path_convert(output_virtual_path)
+    file_support.real_create_local_file(output_virtual_path)
     salt = os.urandom(16)
     key = generate_key(password, salt)
     iv = os.urandom(16)
@@ -40,7 +42,7 @@ def encrypt_file(file_path: str, output_path: str, password: str):
     padder = padding.PKCS7(algorithms.AES.block_size).padder()
 
     buffer_size = 64 * 1024  # 64KB
-    with open(file_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
+    with open(file_real_path, 'rb') as f_in, open(output_real_path, 'wb') as f_out:
         f_out.write(salt + iv)
         while True:
             data = f_in.read(buffer_size)
@@ -53,10 +55,12 @@ def encrypt_file(file_path: str, output_path: str, password: str):
         encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
         f_out.write(encrypted_data)
 
-def decrypt_file(file_path: str, output_path: str, password: str):
-    file_support.create_file(output_path)
+def decrypt_file(file_virtual_path: str, output_virtual_path: str, password: str):
+    file_real_path = file_support.real_local_path_convert(file_virtual_path)
+    output_real_path = file_support.real_local_path_convert(output_virtual_path)
+    file_support.real_create_local_file(output_virtual_path)
     buffer_size = 64 * 1024  # 64KB
-    with open(file_path, 'rb') as f_in, open(output_path, 'wb') as f_out:
+    with open(file_real_path, 'rb') as f_in, open(output_real_path, 'wb') as f_out:
         salt = f_in.read(16)
         iv = f_in.read(16)
         key = generate_key(password, salt)

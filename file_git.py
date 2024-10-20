@@ -12,6 +12,8 @@ from command.command_queue import command_queue
 from command.command_refresh_token import command_refresh_token
 from command.command_verify import command_verify
 
+from support import file_support
+
 @click.group()
 def cli():
     """A command line tool for managing file backups."""
@@ -22,8 +24,8 @@ def init():
     """initialize the local repository."""
     mode = click.prompt('Please enter the mode: ORIGINAL/ENCRYPTED', default='ORIGINAL')
     password = click.prompt('Please enter the password', default='default_password')
-    local_path = click.prompt('Please enter the local_path', default=os.getcwd())
-    remote_path = click.prompt('Please enter the remote_path', default='')
+    virtual_local_path = click.prompt('Please enter the virtual_local_path', default=file_support.virtual_get_current_path())
+    virtual_remote_path = click.prompt('Please enter the virtual_remote_path', default='')
     app_id = click.prompt('Please enter the app_id', default=os.getenv("BDWP_APP_ID", ""))
     secret_key = click.prompt('Please enter the secret_key', default=os.getenv("BDWP_SECRET_KEY", ""))
     app_key = click.prompt('Please enter the app_key', default=os.getenv("BDWP_APP_KEY", ""))
@@ -32,7 +34,7 @@ def init():
     refresh_token = click.prompt('Please enter the refresh_token', default=os.getenv("BDWP_REFRESH_TOKEN", ""))
     access_token = click.prompt('Please enter the access_token', default=os.getenv("BDWP_ACCESS_TOKEN", ""))
 
-    command_init(mode, password, local_path, remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
+    command_init(mode, password, virtual_local_path, virtual_remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
 
 @click.command()
 @click.argument('key')
@@ -48,8 +50,8 @@ def clone():
     # Hooks.base_hook()
     mode = click.prompt('Please enter the mode: ORIGINAL/ENCRYPTED', default='ORIGINAL')
     password = click.prompt('Please enter the password', default='default_password')
-    local_path = click.prompt('Please enter the local_path', default=os.getcwd())
-    remote_path = click.prompt('Please enter the remote_path', default='')
+    virtual_local_path = click.prompt('Please enter the virtual_local_path', default=file_support.virtual_get_current_path())
+    virtual_remote_path = click.prompt('Please enter the virtual_remote_path', default='')
     app_id = click.prompt('Please enter the app_id', default=os.getenv("BDWP_APP_ID", ""))
     secret_key = click.prompt('Please enter the secret_key', default=os.getenv("BDWP_SECRET_KEY", ""))
     app_key = click.prompt('Please enter the app_key', default=os.getenv("BDWP_APP_KEY", ""))
@@ -59,7 +61,7 @@ def clone():
     access_token = click.prompt('Please enter the access_token', default=os.getenv("BDWP_ACCESS_TOKEN", ""))
 
     Hooks.init_constant()
-    command_clone(mode, password, local_path, remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
+    command_clone(mode, password, virtual_local_path, virtual_remote_path, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
 
 @click.command()
 def refresh_token():

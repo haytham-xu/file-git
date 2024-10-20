@@ -21,8 +21,8 @@ class config_instance():
                 secret_key=None, app_key=None, sign_code=None, expires_in=None, refresh_token=None, access_token=None):
         self.mode = mode
         self.password = password
-        self.local_path = local_path
-        self.remote_path = remote_path
+        self.virtual_local_path = local_path
+        self.virtual_remote_path = remote_path
         self.app_id = app_id
         self.secret_key = secret_key
         self.app_key = app_key
@@ -31,15 +31,14 @@ class config_instance():
         self.refresh_token = refresh_token
         self.access_token = access_token
 
-    def read_config(self, config_file_path):
-        if not file_support.is_exist(config_file_path):
-            raise FileNotFoundError(f"config_instance file '{config_file_path}' does not exist.")
-        with open(config_file_path, 'r') as config_file:
-            config_data = json.load(config_file)
+    def read_config(self, config_file_virtual_path):
+        if not file_support.real_is_local_exist(config_file_virtual_path):
+            raise FileNotFoundError(f"config_instance file '{config_file_virtual_path}' does not exist.")
+        config_data = file_support.real_read_json_file(config_file_virtual_path)
         self.mode = Mode.from_string(config_data.get('mode', self.mode))
         self.password = config_data.get('password', self.password)
-        self.local_path = config_data.get('local_path', self.local_path)
-        self.remote_path = config_data.get('remote_path', self.remote_path)
+        self.virtual_local_path = config_data.get('local_path', self.virtual_local_path)
+        self.virtual_remote_path = config_data.get('remote_path', self.virtual_remote_path)
         self.app_id = config_data.get('app_id', self.app_id)
         self.secret_key = config_data.get('secret_key', self.secret_key)
         self.app_key = config_data.get('app_key', self.app_key)
@@ -48,12 +47,12 @@ class config_instance():
         self.refresh_token = config_data.get('refresh_token', self.refresh_token)
         self.access_token = config_data.get('access_token', self.access_token)
 
-    def write_config(self, config_file_path):
+    def write_config(self, config_file_virtual_path):
         config_data = {
             'mode': self.mode.value,
             'password': self.password,
-            'local_path': self.local_path,
-            'remote_path': self.remote_path,
+            'local_path': self.virtual_local_path,
+            'remote_path': self.virtual_remote_path,
             'app_id': self.app_id,
             'secret_key': self.secret_key,
             'app_key': self.app_key,
@@ -62,9 +61,7 @@ class config_instance():
             'refresh_token': self.refresh_token,
             'access_token': self.access_token
         }
-        
-        with open(config_file_path, 'w') as config_file:
-            json.dump(config_data, config_file, indent=4)
+        file_support.real_write_json_file(config_file_virtual_path, config_data)
     
     def get_mode(self):
         return self.mode
@@ -76,15 +73,15 @@ class config_instance():
     def set_password(self, password):
         self.password = password
 
-    def get_local_path(self):
-        return self.local_path
-    def set_local_path(self, local_path):
-        self.local_path = local_path
+    def get_virtual_local_path(self):
+        return self.virtual_local_path
+    def set_virtual_local_path(self, local_path):
+        self.virtual_local_path = local_path
 
-    def get_remote_path(self):
-        return self.remote_path
-    def set_remote_path(self, remote_path):
-        self.remote_path = remote_path
+    def get_virtual_remote_path(self):
+        return self.virtual_remote_path
+    def set_virtual_remote_path(self, remote_path):
+        self.virtual_remote_path = remote_path
 
     def get_app_id(self):
         return self.app_id

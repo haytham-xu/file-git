@@ -11,7 +11,6 @@ def refresh_token():
     app_key = config_instance.get_app_key()
     secret_key = config_instance.get_secret_key()
     res = bdwp_instance.refresh_token(refresh_token, app_key, secret_key)
-    print("==> refresh_token", res)
     access_token = res['access_token']
     refresh_token = res['refresh_token']
     expire_in = res['expires_in']
@@ -19,7 +18,7 @@ def refresh_token():
     config_instance.set_access_token(access_token)
     config_instance.set_refresh_token(refresh_token)
     config_instance.set_expire_in(expire_in)
-    config_instance.write_config(constant_instance.get_config_file_path())
+    config_instance.write_config(constant_instance.get_virtual_config_file_path())
 
     env_file_path = os.path.expanduser("~/.zshrc")
     

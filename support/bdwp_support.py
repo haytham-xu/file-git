@@ -76,12 +76,11 @@ class BaiduWangPan:
         fs_id = res["fs_id"]
         return fs_id
 
-    def upload_file(self, file_local_path, target_absolute_path):
-        target_absolute_path = file_support.convert_to_unix_path(target_absolute_path)
-        file_size = os.path.getsize(file_local_path)
+    def upload_file(self, file_local_real_path, target_absolute_real_path):
+        file_size = os.path.getsize(file_local_real_path)
         file_block = []
         md5_list = []
-        with open(file_local_path, 'rb') as f:
+        with open(file_local_real_path, 'rb') as f:
             while True:
                 chunk = f.read(self.split_size)
                 if not chunk:
@@ -90,26 +89,24 @@ class BaiduWangPan:
             f.close()
         for c in file_block:
             md5_list.append(get_md5(c))
-        upload_id = self.pre_upload(target_absolute_path, file_size, md5_list)
+        upload_id = self.pre_upload(target_absolute_real_path, file_size, md5_list)
         i = 0
         for c in file_block:
             chunk_content = c
             chunk_id = i
-            self.upload_chunk(upload_id, chunk_content, chunk_id, target_absolute_path)
+            self.upload_chunk(upload_id, chunk_content, chunk_id, target_absolute_real_path)
             i += 1
-        return self.create_file(target_absolute_path, upload_id, md5_list, file_size)
+        return self.create_file(target_absolute_real_path, upload_id, md5_list, file_size)
 
-    # file operation - download
+    # file operation - download   , 
     # ---------------------------------------------------------------------------------------
-    def download_file_with_path(self, cloud_download_absolute_path, local_download_absolute_path):
-        cloud_download_absolute_path = file_support.convert_to_unix_path(cloud_download_absolute_path)
-        file_name = file_support.get_file_folder_name(cloud_download_absolute_path)
-        cloud_file_parent_path = file_support.get_file_folder_parent_path(cloud_download_absolute_path)
-        res = self.search_file(file_name, cloud_file_parent_path)
+    def download_file_with_path(self, cloud_download_absolute_real_path, local_download_absolute_real_path):
+        cloud_file_name, cloud_file_parent_path = file_support.virtual_get_file_name_and_parent_path(cloud_download_absolute_real_path)
+        res = self.search_file(cloud_file_name, cloud_file_parent_path)
         fs_id = res['list'][0]['fs_id']
         res = self.get_file_meta(fs_id)
         dlink = res['list'][0]['dlink']
-        self.download_file(dlink, local_download_absolute_path)
+        self.download_file(dlink, local_download_absolute_real_path)
 
     def get_file_content(self, dlink):
         dlink += "&access_token=" + self.access_token
@@ -118,7 +115,7 @@ class BaiduWangPan:
         return res.content
 
     def download_file(self, dlink, local_download_absolute_path):
-        file_support.write_file_byte(local_download_absolute_path, self.get_file_content(dlink))
+        file_support.real_write_file_byte(local_download_absolute_path, self.get_file_content(dlink))
 
     # file/folder operation - deltete
     # ---------------------------------------------------------------------------------------
@@ -136,14 +133,12 @@ class BaiduWangPan:
         payload = {"async": "0", "filelist": json.dumps([{'path': cloud_absolute_path}])}
         return self.bdwp_request_with_token(url, "POST", self.headers, params, payload)
 
-    def move_file_folder(self, cloud_source_file_path, cloud_target_folder_path, file_name=None):
-        cloud_source_file_path = file_support.convert_to_unix_path(cloud_source_file_path)
-        cloud_target_folder_path = file_support.convert_to_unix_path(cloud_target_folder_path)
+    def move_file_folder(self, cloud_source_file_real_path, cloud_target_folder_real_path, file_name=None):
         if file_name is None:
-            file_name = file_support.get_file_folder_name(cloud_source_file_path)
+            file_name = cloud_source_file_real_path.split("/")[-1]
         url = self.base_url + "/rest/2.0/xpan/file"
         params = {"method": "filemanager", "opera": "move"}
-        payload = {"async": "0", "filelist": json.dumps([{'path': cloud_source_file_path, 'dest': cloud_target_folder_path, 'newname': file_name, 'ondup': 'fail'}])}  # ondup: fail, overwrite
+        payload = {"async": "0", "filelist": json.dumps([{'path': cloud_source_file_real_path, 'dest': cloud_target_folder_real_path, 'newname': file_name, 'ondup': 'fail'}])}  # ondup: fail, overwrite
         return self.bdwp_request_with_token(url, "POST", self.headers, params, payload)
 
     # search operation

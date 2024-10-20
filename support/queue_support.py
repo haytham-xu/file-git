@@ -23,9 +23,9 @@ class QueueItem:
         self.action = action
         self.status = status
 
-    def get_middle_path(self):
+    def get_virtual_middle_path(self):
         return self.middle_path
-    def set_middle_path(self, middle_path):
+    def set_virtual_middle_path(self, middle_path):
         self.middle_path = middle_path
     def get_action(self):
         return self.action
@@ -58,8 +58,8 @@ class QueueManager:
         self.lock = False
         self.key_set: List[str] = []
         self.queue_item: Dict[QueueItem] = {}
-        self.action_folder = ""
-        self.queue_file_path = ""
+        self.action_folder_virtual_path = ""
+        self.queue_file_virtual_path = ""
 
     def get_queue_item(self):
         return self.queue_item
@@ -73,20 +73,20 @@ class QueueManager:
     def release_lock(self):
         if self.lock != False:
             self.lock = False
-            self.action_folder = None
+            self.action_folder_virtual_path = None
             self.write_queue()
     def is_queue_empty(self):
         pending_count = sum(1 for item in self.queue_item.values() if item.get_status() == Status.PENDING)
         return pending_count == 0
     
-    def set_action_folder(self, action_folder):
-        self.action_folder = action_folder
-    def get_action_folder(self):
-        return self.action_folder
-    def get_queue_file_path(self):
-        return self.queue_file_path
-    def set_queue_file_path(self, queue_file_path):
-        self.queue_file_path = queue_file_path
+    def set_virtual_action_folder(self, action_folder_virtual_path):
+        self.action_folder_virtual_path = action_folder_virtual_path
+    def get_virtual_action_folder(self):
+        return self.action_folder_virtual_path
+    def get_virtual_queue_file_path(self):
+        return self.queue_file_virtual_path
+    def set_virtual_queue_file_path(self, queue_file_virtual_path):
+        self.queue_file_virtual_path = queue_file_virtual_path
     
     def get_a_queue_item(self):
         for a_key in self.key_set:
@@ -109,22 +109,21 @@ class QueueManager:
         a_queue_item.set_status(status)
 
     def read_queue(self):
-        if not file_support.is_exist(self.get_queue_file_path()):
-            raise FileNotFoundError(f"queue_instance file '{self.get_queue_file_path()}' does not exist.")
-        with open(self.get_queue_file_path(), 'r') as file:
-            data = json.load(file)
-            self.lock = data['lock']
-            self.key_set = data['key_set']
-            self.action_folder = data['action_folder']
-            self.queue_item = {key: QueueItem.from_json(item) for key, item in data['queue_item'].items()}
+        if not file_support.real_is_local_exist(self.get_virtual_queue_file_path()):
+            raise FileNotFoundError(f"queue_instance file '{self.get_virtual_queue_file_path()}' does not exist.")
+        json_data = file_support.real_read_json_file(self.get_virtual_queue_file_path())
+        self.lock = json_data['lock']
+        self.key_set = json_data['key_set']
+        self.action_folder_virtual_path = json_data['action_folder']
+        self.queue_item = {key: QueueItem.from_json(item) for key, item in json_data['queue_item'].items()}   
 
     def write_queue(self):
-        with open(self.get_queue_file_path(), 'w') as file:
-            json.dump({
-                'lock': self.lock,
-                'action_folder': self.action_folder,
-                'key_set': self.key_set,
-                'queue_item': {key: json.loads(item.to_json()) for key, item in self.queue_item.items()}
-            }, file, indent=4)
+        json_data = {
+            'lock': self.lock,
+            'action_folder': self.action_folder_virtual_path,
+            'key_set': self.key_set,
+            'queue_item': {key: json.loads(item.to_json()) for key, item in self.queue_item.items()}
+        }
+        file_support.real_write_json_file(self.get_virtual_queue_file_path(), json_data)
 
 queue_instance = QueueManager()

@@ -29,8 +29,8 @@ def handle_index_json(index_json, action):
         value = index_json[key]
         item_status = Status.PENDING
         item_action = action
-        middle_path = value['middle_path']
-        item_remote_path_hash = file_support.get_string_hash(middle_path)
-        queue_item = QueueItem(middle_path, item_action, item_status)
+        virtual_middle_path = value['middle_path']
+        item_remote_path_hash = file_support.get_string_hash(virtual_middle_path)
+        queue_item = QueueItem(virtual_middle_path, item_action, item_status)
         queue_instance.add_queue_item(item_remote_path_hash, queue_item)
 
