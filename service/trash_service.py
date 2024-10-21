@@ -20,6 +20,8 @@ def remote_move_to_trash(cloud_virtual_path):
     formatted_date = now.strftime("%Y%m%d")
     today_trash_virtual_path = file_support.virtual_merge_path(config_instance.get_virtual_remote_path(), ".trash", formatted_date)
     file_middle_virtual_path = cloud_virtual_path.removeprefix(config_instance.get_virtual_remote_path())
-    target_path_in_trash = file_support.virtual_merge_path(today_trash_virtual_path, file_middle_virtual_path)
+    
+    _, file_parent_middle_virtual_path = file_support.virtual_get_file_name_and_parent_path(file_middle_virtual_path)
+    target_path_in_trash = file_support.virtual_merge_path(today_trash_virtual_path, file_parent_middle_virtual_path)
     file_service.move_file_folder(cloud_virtual_path, target_path_in_trash)
 

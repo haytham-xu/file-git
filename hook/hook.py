@@ -17,6 +17,7 @@ class Hooks:
         Hooks.init_config()
         Hooks.verify_fgit_folder()
         Hooks.init_baidu_wangpan()
+        Hooks.init_queue_file_path()
 
     @staticmethod
     def init_constant():
