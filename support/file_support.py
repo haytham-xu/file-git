@@ -108,6 +108,12 @@ def real_create_local_folder(virtual_path):
         real_path = real_local_path_convert(virtual_path)
         os.makedirs(real_path)
 
+def real_check_and_create_parent_folder(virtual_path):
+    real_path = real_local_path_convert(virtual_path)
+    parent_path = os.path.split(real_path)[0]
+    if not os.path.exists(parent_path):
+        os.makedirs(parent_path)
+
 def real_create_local_file(virtual_path):
     real_path = real_local_path_convert(virtual_path)
     parent_path = os.path.split(real_path)[0]

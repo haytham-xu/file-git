@@ -32,8 +32,8 @@ def get_cloud_index(cloud_root_virtual_path):
     for file_info in file_dict:
         real_unix_file_path = file_info["path"]
         
-        if any(part.startswith('.') for part in real_unix_file_path.split("/")):
-            continue
+        # if any(part.startswith('.') for part in real_unix_file_path.split("/")):
+        #     continue
         if file_info["server_filename"].startswith('.'):
             continue
         file_size = file_info["size"]

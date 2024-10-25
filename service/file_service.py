@@ -9,6 +9,7 @@ def list_cloud_file_recursion(remote_path):
 def download_file(cloud_download_absolute_virtual_path, local_download_absolute_virtual_path):
     cloud_download_absolute_real_path = file_support.convert_to_unix_path(cloud_download_absolute_virtual_path)
     local_download_absolute_real_path = file_support.real_local_path_convert(local_download_absolute_virtual_path)
+    file_support.real_check_and_create_parent_folder(local_download_absolute_real_path)
     bdwp_instance.download_file_with_path(cloud_download_absolute_real_path, local_download_absolute_real_path)
 
 def upload_file(local_upload_absolute_virtual_path, cloud_upload_absolute_virtual_path):
