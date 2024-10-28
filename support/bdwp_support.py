@@ -180,7 +180,6 @@ class BaiduWangPan:
         params = {"method": "listall", "path": target_cloud_absolute_path, "web": 0, "recursion": 1, "start": start, "limit": limit}
         return self.bdwp_request_with_token(url, "GET", self.headers, params)
 
-
 def get_md5(data_string):
     md5 = hashlib.md5()
     md5.update(data_string)

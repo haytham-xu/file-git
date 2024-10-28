@@ -32,9 +32,9 @@ def command_pull():
     cloud_index_json = index_facade.get_cloud_index(config_instance.get_virtual_remote_path())
     file_support.real_write_json_file(remote_index_json_path, cloud_index_json)
 
-    only_in_local_json = pull_facade.get_only_in_local(local_index_json, cloud_index_json)
-    only_in_cloud_json = pull_facade.get_only_in_remote(local_index_json, cloud_index_json)
-    local_cloud_diff_json = pull_facade.get_local_remote_diff(local_index_json, cloud_index_json)
+    only_in_local_json = index_facade.get_only_in_local(local_index_json, cloud_index_json)
+    only_in_cloud_json = index_facade.get_only_in_remote(local_index_json, cloud_index_json)
+    local_cloud_diff_json = index_facade.get_local_remote_diff(local_index_json, cloud_index_json)
     pull_facade.handle_index_json(only_in_local_json, Action.LOCAL_DELETE)
     pull_facade.handle_index_json(only_in_cloud_json, Action.DOWNLOAD)
     pull_facade.handle_index_json(local_cloud_diff_json, Action.DOWNLOAD)

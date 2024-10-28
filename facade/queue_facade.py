@@ -64,6 +64,8 @@ def trigger():
                 trash_service.local_move_to_trash(file_virtual_path_in_local)
             elif a_queue_item.get_action() == Action.REMOTE_DELETE:
                 trash_service.remote_move_to_trash(file_support.virtual_merge_path(config_instance.get_virtual_remote_path(), a_queue_item.get_virtual_middle_path()))
+            elif a_queue_item.get_action() == Action.ONLY_ENCRYPTED:
+                buffer_service.move_to_buffer(file_virtual_path_in_local)
             else:
                 pass
             queue_instance.removed_queue_item(a_key)

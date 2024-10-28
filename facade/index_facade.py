@@ -45,3 +45,23 @@ def get_cloud_index(cloud_root_virtual_path):
             'size': file_size
         }
     return remote_dict
+
+def get_only_in_local(local_index_json, cloud_index_json):
+    only_in_local_json = {key: value for key, value in local_index_json.items() if key not in cloud_index_json}
+    return only_in_local_json
+
+def get_only_in_remote(local_index_json, cloud_index_json):
+    only_in_remote_json = {key: value for key, value in cloud_index_json.items() if key not in local_index_json}
+    return only_in_remote_json
+
+def get_local_remote_diff(local_index_json, cloud_index_json):
+    diff = {}
+    # for key, local_value in local_index_json.items():
+    #     if key in cloud_index_json:
+    #         cloud_value = cloud_index_json[key]
+    #         if local_value['size'] != cloud_value['size']:
+    #             diff[key] = {
+    #                 'local': local_value,
+    #                 'remote': cloud_value
+    #             }
+    return diff

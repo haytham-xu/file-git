@@ -1,5 +1,4 @@
 
-import json
 from enum import Enum
 
 from support import file_support

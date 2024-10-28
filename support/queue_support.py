@@ -16,6 +16,7 @@ class Action(Enum):
     UPLOAD = "UPLOAD"
     LOCAL_DELETE = "LOCAL_DELETE"
     REMOTE_DELETE = "REMOTE_DELETE"
+    ONLY_ENCRYPTED = "ONLY_ENCRYPTED"
 
 class QueueItem:
     def __init__(self, middle_path:str="", action:Action=None, status:Status=Status.PENDING):

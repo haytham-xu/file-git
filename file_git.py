@@ -11,6 +11,8 @@ from command.command_push import command_push
 from command.command_queue import command_queue
 from command.command_refresh_token import command_refresh_token
 from command.command_verify import command_verify
+from command.command_diff import command_diff
+from command.command_encrypted import command_encrypted
 
 from support import file_support
 
@@ -97,6 +99,21 @@ def verify():
     Hooks.clean_trash()
     command_verify()
 
+@click.command()
+@click.argument('strategy')
+@click.argument('source_path')
+@click.argument('target_path')
+def command_diff(strategy, virtual_source_path, virtual_target_path):
+    """change file-git config_instance, key-value pairs."""
+    Hooks.base_hook()
+    command_diff(strategy, virtual_source_path, virtual_target_path)
+
+@click.command()
+@click.option('--all-flag', '-a', help='encrypted all files.')
+def command_encrypted(all_flag):
+    """encrypted files but not upload, if -a is false, will only encrtptes only in local files."""
+    Hooks.base_hook()
+    command_encrypted(all_flag)
 
 cli.add_command(init)
 cli.add_command(clone)
@@ -107,6 +124,9 @@ cli.add_command(pull)
 cli.add_command(push)
 cli.add_command(queue)
 cli.add_command(verify)
+
+cli.add_command(command_diff)
+cli.add_command(command_encrypted)
 
 if __name__ == "__main__":
     cli()
