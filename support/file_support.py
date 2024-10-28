@@ -40,7 +40,7 @@ def real_write_json_file(virtual_file_path, data):
         
 def real_write_file(virtual_file_path, data):
     real_file_path = real_local_path_convert(virtual_file_path)
-    with open(real_file_path, 'w') as f:
+    with open(real_file_path, 'w', encoding='utf-8') as f:
         f.write(data)
         
 def real_create_png(output_virtual_path, image, size_in_bytes):
@@ -59,7 +59,7 @@ def real_write_file_byte(virtual_path:str, content):
     
 def real_append_file(virtual_path, content):
     real_path = real_local_path_convert(virtual_path)
-    with open(real_path, 'a') as log_file:
+    with open(real_path, 'a', encoding='utf-8') as log_file:
         log_file.write(content)
     
 # virtual path operation

@@ -66,7 +66,8 @@ def clone():
 @click.command()
 def refresh_token():
     """refresh Baidu Wangpan access token."""
-    click.echo(f"command-refresh_token.")
+    Hooks.base_hook()
+    command_refresh_token()
 
 @click.command()
 def pull():
@@ -91,7 +92,7 @@ def queue():
 
 @click.command()
 def verify():
-    """contiune queue action."""
+    """verify local and remote dictory."""
     Hooks.base_hook()
     Hooks.clean_trash()
     command_verify()
