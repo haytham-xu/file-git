@@ -35,7 +35,7 @@ def real_read_json_file(virtual_file_path):
 
 def real_write_json_file(virtual_file_path, data):
     real_file_path = real_local_path_convert(virtual_file_path)
-    with open(real_file_path, 'w') as file:
+    with open(real_file_path, 'w', encoding='utf-8') as file:
         json.dump(data, file, indent=4)
         
 def real_write_file(virtual_file_path, data):

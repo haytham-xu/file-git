@@ -25,6 +25,9 @@ def move_to_buffer(file_virtual_path_in_local):
     if config_instance.get_mode() == Mode.ENCRYPTED:
         encode_middle_virtual_path = encrypt_support.encode_path(file_virtual_local_middle_path)
         encode_file_virtual_path = file_support.virtual_merge_path(constant_instance.get_virtual_buffer_folder_path(), encode_middle_virtual_path)
+        if file_support.real_is_local_exist(encode_file_virtual_path):
+            print("encryptes file exist, skip: ", encode_file_virtual_path)
+            return
         encrypt_support.encrypt_file(file_virtual_path_in_local, encode_file_virtual_path, config_instance.get_password())
     else:
         file_buffer_virtual_path = file_support.virtual_merge_path(constant_instance.get_virtual_buffer_folder_path(), file_virtual_local_middle_path)

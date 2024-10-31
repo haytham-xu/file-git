@@ -41,8 +41,8 @@ def command_diff(strategy, virtual_source_path, virtual_target_path):
         target_index_json = index_facade.get_local_index(virtual_target_path)
         file_support.real_write_json_file(target_index_json_path, target_index_json)
 
-        only_in_source_json = index_facade.get_only_in_local(source_index_json_path, target_index_json_path)
-        only_in_target_json = index_facade.get_only_in_remote(source_index_json_path, target_index_json_path)
+        only_in_source_json = index_facade.get_only_in_local(source_index_json, target_index_json)
+        only_in_target_json = index_facade.get_only_in_remote(source_index_json, target_index_json)
 
         report_file_path = file_support.virtual_merge_path(current_action_folder_path, "report.json")
         return generate_diff_report(only_in_source_json, only_in_target_json, report_file_path)
@@ -56,8 +56,8 @@ def command_diff(strategy, virtual_source_path, virtual_target_path):
         target_index_json = index_facade.get_cloud_index(virtual_target_path)
         file_support.real_write_json_file(target_index_json_path, target_index_json)
 
-        only_in_source_json = index_facade.get_only_in_local(source_index_json_path, target_index_json_path)
-        only_in_target_json = index_facade.get_only_in_remote(source_index_json_path, target_index_json_path)
+        only_in_source_json = index_facade.get_only_in_local(source_index_json, target_index_json)
+        only_in_target_json = index_facade.get_only_in_remote(source_index_json, target_index_json)
 
         report_file_path = file_support.virtual_merge_path(current_action_folder_path, "report.json")
         return generate_diff_report(only_in_source_json, only_in_target_json, report_file_path)
@@ -65,6 +65,8 @@ def command_diff(strategy, virtual_source_path, virtual_target_path):
     raise ValueError(f"'{strategy}' is not a valid DIFF_STRATEGY")
         
 def generate_diff_report(only_in_local_json, only_in_cloud_json, report_file_path):
+    
+    report_file_path = file_support.real_local_path_convert(report_file_path)
 
     if len(only_in_local_json) == 0 and len(only_in_cloud_json) == 0:
         print("No differences found.")

@@ -25,7 +25,7 @@ class BaiduWangPan:
     # ---------------------------------------------------------------------------------------
     def http_request(self, url, method, headers, params={}, payload={}, files={}):
         res = requests.request(method, url, params=params, headers=headers, data = payload, files = files, timeout=360)
-        time.sleep(1)
+        time.sleep(3)
         if res.status_code == 200:
             return res
         raise Exception("Request failed, eror message: ", res.text)
@@ -156,7 +156,7 @@ class BaiduWangPan:
 
     def list_folder_file_recursion(self, target_path):
         target_path = file_support.convert_to_unix_path(target_path)
-        limitation = 1000
+        limitation = 10000
         current_index = 0
         folder_list = []
         file_list = []

@@ -1,6 +1,8 @@
 
 from support import file_support
 
+buffer_size = 500
+
 class Constant():
     
     def __init__(self, local_path="", file_git_foler_name=".fgit", trash_folder_name="trash", action_folder_name="action", buffer_folder_name="buffer", queue_file_name="queue.json", config_file_name="config.json"):

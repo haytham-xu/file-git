@@ -4,6 +4,7 @@ from enum import Enum
 from typing import List, Dict
 
 from support import file_support
+from support import constant_support
 
 class Status(Enum):
     PENDING = "PENDING"
@@ -61,6 +62,7 @@ class QueueManager:
         self.queue_item: Dict[QueueItem] = {}
         self.action_folder_virtual_path = ""
         self.queue_file_virtual_path = ""
+        self.buffer = 0
 
     def get_queue_item(self):
         return self.queue_item
@@ -119,12 +121,16 @@ class QueueManager:
         self.queue_item = {key: QueueItem.from_json(item) for key, item in json_data['queue_item'].items()}   
 
     def write_queue(self):
-        json_data = {
-            'lock': self.lock,
-            'action_folder': self.action_folder_virtual_path,
-            'key_set': self.key_set,
-            'queue_item': {key: json.loads(item.to_json()) for key, item in self.queue_item.items()}
-        }
-        file_support.real_write_json_file(self.get_virtual_queue_file_path(), json_data)
+        if self.is_queue_empty() or (not self.is_queue_empty() and self.buffer >= constant_support.buffer_size):
+            json_data = {
+                'lock': self.lock,
+                'action_folder': self.action_folder_virtual_path,
+                'key_set': self.key_set,
+                'queue_item': {key: json.loads(item.to_json()) for key, item in self.queue_item.items()}
+            }
+            file_support.real_write_json_file(self.get_virtual_queue_file_path(), json_data)
+            self.buffer = 0
+        else:
+            self.buffer += 1
 
 queue_instance = QueueManager()
