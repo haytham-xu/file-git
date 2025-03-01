@@ -10,13 +10,13 @@ from cryptography.hazmat.primitives import padding
 from support import file_support
 
 
-def encode_path(source_virtual_path):
-    virtual_path_segments = source_virtual_path.split("/")
-    virtual_encoded_segments = [base64.urlsafe_b64encode(segment.encode()).decode() for segment in virtual_path_segments]
+def encode_path(source_vpath):
+    vpath_segments = source_vpath.split("/")
+    virtual_encoded_segments = [base64.urlsafe_b64encode(segment.encode()).decode() for segment in vpath_segments]
     return "/".join(virtual_encoded_segments)
 
-def decode_path(encoded_virtual_path):
-    encoded_virtual_segments = encoded_virtual_path.split("/")
+def decode_path(encoded_vpath):
+    encoded_virtual_segments = encoded_vpath.split("/")
     decoded_virtual_segments = [base64.urlsafe_b64decode(segment.encode()).decode() for segment in encoded_virtual_segments]
     return "/".join(decoded_virtual_segments)
 
@@ -30,10 +30,10 @@ def generate_key(password: str, salt: bytes) -> bytes:
     )
     return kdf.derive(password.encode())
 
-def encrypt_file(file_virtual_path: str, output_virtual_path: str, password: str):
-    file_real_path = file_support.real_local_path_convert(file_virtual_path)
-    output_real_path = file_support.real_local_path_convert(output_virtual_path)
-    file_support.real_create_local_file(output_virtual_path)
+def encrypt_file(file_vpath: str, output_vpath: str, password: str):
+    file_real_path = file_support.real_local_path_convert(file_vpath)
+    output_real_path = file_support.real_local_path_convert(output_vpath)
+    file_support.real_create_local_file(output_vpath)
     salt = os.urandom(16)
     key = generate_key(password, salt)
     iv = os.urandom(16)
@@ -55,10 +55,10 @@ def encrypt_file(file_virtual_path: str, output_virtual_path: str, password: str
         encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
         f_out.write(encrypted_data)
 
-def decrypt_file(file_virtual_path: str, output_virtual_path: str, password: str):
-    file_real_path = file_support.real_local_path_convert(file_virtual_path)
-    output_real_path = file_support.real_local_path_convert(output_virtual_path)
-    file_support.real_create_local_file(output_virtual_path)
+def decrypt_file(file_vpath: str, output_vpath: str, password: str):
+    file_real_path = file_support.real_local_path_convert(file_vpath)
+    output_real_path = file_support.real_local_path_convert(output_vpath)
+    file_support.real_create_local_file(output_vpath)
     buffer_size = 64 * 1024  # 64KB
     with open(file_real_path, 'rb') as f_in, open(output_real_path, 'wb') as f_out:
         salt = f_in.read(16)

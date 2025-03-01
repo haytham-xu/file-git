@@ -3,13 +3,12 @@ import os
 
 from support.bdwp_support import bdwp_instance
 
-from support.config_support import config_instance
-from support.constant_support import constant_instance
+from model.config import FilegitConfig
 
 def refresh_token():
-    refresh_token = config_instance.get_refresh_token()
-    app_key = config_instance.get_app_key()
-    secret_key = config_instance.get_secret_key()
+    refresh_token = FilegitConfig.get_refresh_token()
+    app_key = FilegitConfig.get_app_key()
+    secret_key = FilegitConfig.get_secret_key()
     res = bdwp_instance.refresh_token(refresh_token, app_key, secret_key)
     
     access_token = res['access_token']
@@ -18,7 +17,7 @@ def refresh_token():
     
     print(res)
 
-    config_instance.set_access_token(access_token)
-    config_instance.set_refresh_token(refresh_token)
-    config_instance.set_expires_in(expire_in)
-    config_instance.write_config(constant_instance.get_virtual_config_file_path())
+    FilegitConfig.set_access_token(access_token)
+    FilegitConfig.set_refresh_token(refresh_token)
+    FilegitConfig.set_expires_in(expire_in)
+    FilegitConfig.write_config(constant_support.CONFIG_FILE_VPATH)

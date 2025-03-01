@@ -7,19 +7,18 @@ import hashlib
 from datetime import datetime
 
 from support import file_support
-from support import time_support
-from support.constant_support import constant_instance
+from support import fgit_support
 
 action_name = "duplicate"
 
 def command_find_duplicate(virtual_source_path):
     
-    current_action_folder_name = time_support.get_action_folder_name(action_name)
-    current_action_folder_path = file_support.virtual_merge_path(constant_instance.get_virtual_action_folder_path(), current_action_folder_name)
-    file_support.real_create_local_folder(current_action_folder_path)
+    current_action_folder_name = fgit_support.get_action_folder_name(action_name)
+    current_action_folder_path = file_support.merge_vpath(constant_support.ACTION_FOLDER_VPATH, current_action_folder_name)
+    file_support.create_local_folder(current_action_folder_path)
 
-    index_file_path = file_support.virtual_merge_path(current_action_folder_path, "index.json")
-    report_file_path = file_support.virtual_merge_path(current_action_folder_path, "report.json")
+    index_file_path = file_support.merge_vpath(current_action_folder_path, "index.json")
+    report_file_path = file_support.merge_vpath(current_action_folder_path, "report.json")
     
     
     all_file_index = {}
@@ -35,8 +34,8 @@ def command_find_duplicate(virtual_source_path):
         for filename in filenames:
             if filename.startswith('.'):
                 continue
-            virtual_parent_path = file_support.virtual_path_convert(real_parent_path)
-            virtual_file_path = file_support.virtual_merge_path(virtual_parent_path, filename)
+            virtual_parent_path = file_support.vpath_convert(real_parent_path)
+            virtual_file_path = file_support.merge_vpath(virtual_parent_path, filename)
             file_name, file_size, file_md5 = get_filename_size_md5(virtual_file_path)
             file_code = "{}-{}-{}".format(file_name, file_size, file_md5)
             
