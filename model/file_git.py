@@ -30,7 +30,7 @@ class Filegit():
         local_vpath = file_support.get_current_vpath()
         action_folder_name = "{}_{}".format(time_support.get_time_with_ymd(), action_name)
         action_folder_vpath = file_support.merge_vpath(self.get_action_folder_vpath(local_vpath), action_folder_name)
-        file_support.create_local_folder(vpath=action_folder_vpath)
+        file_support.create_local_folder(rpath=action_folder_vpath)
         # 3. init config
         config_instance.init(self.get_config_file_vpath(local_vpath))
         # 3. init log

@@ -27,40 +27,37 @@ def convert_to_vpath(a_path:str):
     res = "/" + "/".join(path_list)
     return res
 
+def merge_convert_vpath(*path_segments):
+    merged_path = merge_vpath(*path_segments)
+    return convert_to_vpath(merged_path)
+
+
 # real json/yaml operation
 # ---------------------------------------------------------------------------------------
 def real_read_json_file(file_vpath):
-    real_file_path = real_local_path_convert(file_vpath)
+    real_file_path = convert_to_rpath(file_vpath)
     with open(real_file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
     return data
 
 def real_write_json_file(file_vpath, data):
-    real_file_path = real_local_path_convert(file_vpath)
+    real_file_path = convert_to_rpath(file_vpath)
     with open(real_file_path, 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
         
 def real_write_file(virtual_file_path, data):
-    real_file_path = real_local_path_convert(virtual_file_path)
+    real_file_path = convert_to_rpath(virtual_file_path)
     with open(real_file_path, 'w', encoding='utf-8') as f:
         f.write(data)
         
-def real_create_png(output_vpath, image, size_in_bytes):
-    file_rpath = real_local_path_convert(output_vpath)
-    with open(file_rpath, 'wb') as f:
-        image.save(f, format='PNG')
-        current_size = f.tell()
-        if current_size < size_in_bytes:
-            f.write(b'\0' * (size_in_bytes - current_size))
-
 def real_write_file_byte(vpath:str, content):
-    rpath = real_local_path_convert(vpath)
+    rpath = convert_to_rpath(vpath)
     with open(rpath, 'wb+') as f:
         f.write(content)
     f.close()
     
 def real_append_file(vpath, content):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     with open(real_path, 'a', encoding='utf-8') as log_file:
         log_file.write(content)
     
@@ -97,7 +94,7 @@ def get_file_name_and_parent_vpath(vpath):
 
 # real path operation
 # ---------------------------------------------------------------------------------------
-def real_local_path_convert(vpath):
+def convert_to_rpath(vpath):
     path_list = vpath.split("/")
     a = os.path.sep.join(path_list)
     if a[0] == "/":
@@ -106,29 +103,33 @@ def real_local_path_convert(vpath):
         return a[1:]
     return a
 
-def create_local_folder(vpath):
+def merge_convert_rpath(*path_segments):
+    merged_path = merge_vpath(*path_segments)
+    return convert_to_rpath(merged_path)
+
+def create_local_folder(rpath):
     # funny, there would have thread security issue.
-    if not is_local_exist(vpath):
-        real_path = real_local_path_convert(vpath)
+    if not is_local_exist(rpath):
+        real_path = convert_to_rpath(rpath)
         os.makedirs(real_path, exist_ok=True)
         time.sleep(5)
         
 
 def real_check_and_create_parent_folder(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     parent_path = os.path.split(real_path)[0]
     if not os.path.exists(parent_path):
         os.makedirs(parent_path)
 
 def real_create_local_file(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     parent_path = os.path.split(real_path)[0]
     create_local_folder(parent_path)
     open(real_path, 'w').close()
 
 def real_copy_file_folder(virtual_source_path, virtual_target_path):
-    real_source_path = real_local_path_convert(virtual_source_path)
-    real_target_path = real_local_path_convert(virtual_target_path)
+    real_source_path = convert_to_rpath(virtual_source_path)
+    real_target_path = convert_to_rpath(virtual_target_path)
     if os.path.isdir(real_source_path):
         shutil.copytree(real_source_path, real_target_path)
     else:
@@ -138,18 +139,18 @@ def real_copy_file_folder(virtual_source_path, virtual_target_path):
         shutil.copy(real_source_path, real_target_path)
 
 def real_move_file_folder(source_vpath, target_vpath):
-    real_source_path = real_local_path_convert(source_vpath)
-    real_target_path = real_local_path_convert(target_vpath)
+    real_source_path = convert_to_rpath(source_vpath)
+    real_target_path = convert_to_rpath(target_vpath)
     parent_path = os.path.split(real_target_path)[0]
     create_local_folder(parent_path)
     shutil.move(real_source_path, real_target_path)
     
 def real_is_dir(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     return os.path.isdir(real_path)
 
 def real_delete_local_path(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     if is_local_exist(real_path):
         if os.path.isdir(real_path):
             shutil.rmtree(real_path)
@@ -157,23 +158,23 @@ def real_delete_local_path(vpath):
             os.remove(real_path)
     
 def is_local_exist(vpath:str):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     return os.path.exists(real_path) 
 
 def get_real_file_folder_local_name(vpath:str):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     return os.path.split(real_path)[1]
 
 def get_real_file_folder_parent_local_path(vpath:str):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     return os.path.split(real_path)[0]
 
 def real_listdir(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     return os.listdir(real_path)
 
 def is_folder_empty(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     with os.scandir(real_path) as it:
         return not any(it)
 
@@ -193,6 +194,6 @@ def local_delete_empty_parent_folders(file_local_vpath):
 # ---------------------------------------------------------------------------------------
 
 def get_file_size(vpath):
-    real_path = real_local_path_convert(vpath)
+    real_path = convert_to_rpath(vpath)
     return os.path.getsize(real_path)
     

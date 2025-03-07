@@ -6,7 +6,7 @@ from model.config import config_instance
 from model.file_git import fgit_instance
 from model.logger import logger_instance
 
-def command_init(mode='ORIGINAL', password='', local_vpath='', remote_vpath='', app_id='', secret_key='', app_key='', sign_code='', expires_in='', refresh_token='', access_token=''):
+def command_init(mode=Mode.ORIGINAL, password='', local_vpath='', remote_vpath='', app_id='', secret_key='', app_key='', sign_code='', expires_in='', refresh_token='', access_token=''):
     # create folder trash
     # create folder action
     logger_instance.log_debug("command_init is running")
@@ -33,7 +33,7 @@ def command_init(mode='ORIGINAL', password='', local_vpath='', remote_vpath='', 
     logger_instance.log_debug("file create successfully", fgit_instance.get_cloud_index_file_vpath(local_vpath))
 
     logger_instance.log_debug("config_instance init...")
-    config_instance.set_mode(Mode.from_string(mode))
+    config_instance.set_mode(mode)
     config_instance.set_password(password)
     config_instance.set_local_vpath(local_vpath)
     config_instance.set_remote_vpath(remote_vpath)

@@ -3,7 +3,7 @@ import os
 import click
 
 from command.command_init import command_init
-from hook.hook import Hooks
+# from hook.hook import Hooks
 from command.command_set_config import command_set_config
 from command.command_clone import command_clone
 from command.command_pull import command_pull
@@ -16,6 +16,7 @@ from command.command_encrypted import command_encrypted
 from command.command_find_duplicate import command_find_duplicate
 
 from support import file_support
+from model.config import Mode
 
 @click.group()
 def cli():
@@ -37,7 +38,7 @@ def init():
     refresh_token = click.prompt('Please enter the refresh_token', default=os.getenv("BDWP_REFRESH_TOKEN", ""))
     access_token = click.prompt('Please enter the access_token', default=os.getenv("BDWP_ACCESS_TOKEN", ""))
 
-    command_init(mode, password, local_vpath, remote_vpath, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
+    command_init(Mode.from_string(mode), password, local_vpath, remote_vpath, app_id, secret_key, app_key, sign_code, expires_in, refresh_token, access_token)
 cli.add_command(init)
 
 # @click.command()
@@ -88,8 +89,6 @@ cli.add_command(init)
 @click.option('-o', '--offline', is_flag=True, help='Run in offline mode')
 def push(offline):
     """push files to the remote repository."""
-    # Hooks.base_hook()
-    # Hooks.clean_trash()
     command_push(offline)
 cli.add_command(push)
 

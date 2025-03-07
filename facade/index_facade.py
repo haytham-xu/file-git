@@ -5,10 +5,12 @@ from service import file_service
 from support import file_support
 from service import buffer_service
 from model.logger import logger_instance
+from model.config import config_instance, Mode
+from support import encrypt_support
 
 def get_local_index(local_vpath):
     local_dict = {}
-    real_local_root_path = file_support.real_local_path_convert(local_vpath)
+    real_local_root_path = file_support.convert_to_rpath(local_vpath)
     for real_parent_path, dirnames, filenames in os.walk(real_local_root_path):
         dirnames[:] = [d for d in dirnames if not d.startswith('.')]
         for filename in filenames:
@@ -54,6 +56,9 @@ def get_only_in_local(local_index_json, cloud_index_json):
 
 def get_only_in_remote(local_index_json, cloud_index_json):
     only_in_remote_json = {key: value for key, value in cloud_index_json.items() if key not in local_index_json}
+    if config_instance.get_mode() == Mode.ENCRYPTED:
+        for _, value in only_in_remote_json.items():
+            value['middle_path'] = encrypt_support.decode_path(value['middle_path'])
     return only_in_remote_json
 
 def get_local_remote_diff(local_index_json, cloud_index_json):

@@ -113,7 +113,7 @@ def create_file_in_remote(local_file_vpath, cloud_file_vpath, file_type):
     
     file_middle_vpath = local_file_vpath.removeprefix(local_test_root_folder_vpath)
     file_vpath_in_local = file_support.merge_vpath(local_test_root_folder_vpath, file_middle_vpath)
-    file_vpath_in_buffer = buffer_service.get_file_buffer_path(local_buffer_folder_vpath, file_middle_vpath)
+    file_vpath_in_buffer = file_support.merge_vpath(local_buffer_folder_vpath, buffer_service.get_buffer_cloud_middle_path_base_mode(file_middle_vpath))
 
     file_vpath_in_remote = file_support.merge_vpath(cloud_test_folder_root_vpath, file_middle_vpath)
     buffer_service.move_to_buffer(file_vpath_in_local, local_test_root_folder_vpath, local_buffer_folder_vpath, Mode.ORIGINAL, fgit_password)

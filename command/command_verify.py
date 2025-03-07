@@ -39,7 +39,7 @@ def command_verify():
     
 def generate_diff_report(only_in_local_json, only_in_cloud_json, local_cloud_diff_json, report_file_path):
     
-    report_file_path = file_support.real_local_path_convert(report_file_path)
+    report_file_path = file_support.convert_to_rpath(report_file_path)
 
     if len(only_in_local_json) == 0 and len(only_in_cloud_json) == 0 and len(local_cloud_diff_json) == 0:
         print("No differences found.")

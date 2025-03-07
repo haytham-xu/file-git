@@ -5,6 +5,7 @@ from model.constant import FilegitConstant
 from model.config import config_instance
 import inspect
 import os
+import threading
 
 class LoggerManager:
     def __init__(self):
@@ -44,6 +45,7 @@ class LoggerManager:
 
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         message = '  '.join(map(str, args))
-        print(f"[DEBUG] {current_time} {caller_file}.{caller_function} {message}")
+        thread_id = threading.get_ident()
+        print(f"[DEBUG] {current_time} {caller_file}.{caller_function} || {thread_id} || {message}")
 
 logger_instance = LoggerManager()

@@ -27,7 +27,7 @@ def command_find_duplicate(virtual_source_path):
     buffer = 1000
     index = 0
     
-    real_local_root_path = file_support.real_local_path_convert(virtual_source_path)
+    real_local_root_path = file_support.convert_to_rpath(virtual_source_path)
     for real_parent_path, dirnames, filenames in os.walk(real_local_root_path):
         dirnames[:] = [d for d in dirnames if not d.startswith('.')]
         
@@ -62,7 +62,7 @@ def command_find_duplicate(virtual_source_path):
     file_support.real_write_json_file(report_file_path, duplicate_index)    
 
 def get_filename_size_md5(virtual_file_path):
-    real_file_path = file_support.real_local_path_convert(virtual_file_path)
+    real_file_path = file_support.convert_to_rpath(virtual_file_path)
     file_name = os.path.basename(real_file_path)
     file_size = os.path.getsize(real_file_path)
     md5_hash = hashlib.md5()

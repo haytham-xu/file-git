@@ -7,6 +7,7 @@ from facade.queue_facade import queue_instance
 
 from model.queue import QueueItem
 from model.logger import logger_instance
+from model.file_git import fgit_instance
 
 from support import file_support
 from support.bdwp_support import bdwp_instance
@@ -14,7 +15,31 @@ from support.bdwp_support import bdwp_instance
 from uttest.abstract_test import AbstractBDWPTestCase
 from uttest.test_support import test_support_instance
 from uttest import test_support
+from model.config import Mode
 
+'''
+python3 -m unittest uttest.test_command_push.TestCommandPush -v -f
+
+python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_pus_online_original -v -f
+python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_pus_offline_original -v -f
+python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_pus_online_encrypted -v -f
+python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_pus_offline_encrypted -v -f
+
+{
+    "637772eb0c3dc923a5fe1a5bc7c1fae9": {
+        "middle_path": "/Y18xLnBuZw==",
+        "size": 1048624
+    },
+    "1c32dc70c6f1f445b7422d2e72d1c575": {
+        "middle_path": "/Y2ZfMQ==/Y18yLnBuZw==",
+        "size": 1048624
+    },
+    "0497a49c66bf337994c3b9afdddd0bc3": {
+        "middle_path": "/Y2ZfMg==/Y2ZfMjI=/Y18zLnBuZw==",
+        "size": 1048624
+    }
+}
+'''
 class TestCommandPush(AbstractBDWPTestCase):
     
     # before each function
@@ -22,123 +47,132 @@ class TestCommandPush(AbstractBDWPTestCase):
         bdwp_instance.create_folder(test_support_instance.get_mock_cloud_vpath())
         file_support.create_local_folder(test_support_instance.get_mock_local_vpath())
 
-    # python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_original -v -f
-    def test_command_push_original(self):
-        file_support.real_delete_local_path("/Users/I353667/Documents/code/github/file-git/uttest/tmp")
-        # local path: ./uttest/tmp/local/test_fgit
-        # cloud path: ./uttest/tmp/cloud/test_fgit
-        command_init(local_vpath=test_support_instance.get_mock_local_vpath(), remote_vpath=test_support_instance.get_mock_cloud_vpath())
+    def test_command_pus_online_original(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_push(Mode.ORIGINAL, txt_file_list, png_file_list)
+        command_push.command_push(offline=False)
+        verify_action_result(
+            local_file_list=txt_file_list,
+            cloud_file_list=txt_file_list,
+            local_trash_list=[],
+            cloud_trash_list=txt_file_list,
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
-        txt_1_name = "/l_1.txt"
-        txt_2_name = "/lf_1/l_2.txt"
-        txt_3_name = "/lf_2/lf_22/l_3.txt"
-        png_1_name = "/c_1.png"
-        png_2_name = "/cf_1/c_2.png"
-        png_3_name = "/cf_2/cf_22/c_3.png"
+    def test_command_pus_offline_original(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_push(Mode.ORIGINAL, txt_file_list, png_file_list)
+        remote_json_content = {
+            "637772eb0c3dc923a5fe1a5bc7c1fae9": {"middle_path": "/c_1.png", "size": 1048576},
+            "1c32dc70c6f1f445b7422d2e72d1c575": {"middle_path": "/cf_1/c_2.png", "size": 1048576},
+            "0497a49c66bf337994c3b9afdddd0bc3": {"middle_path": "/cf_2/cf_22/c_3.png", "size": 1048576 }
+        }
+        file_support.real_write_json_file(fgit_instance.get_cloud_index_file_vpath(test_support_instance.get_mock_local_vpath()), remote_json_content)
+        command_push.command_push(offline=True)
+        verify_action_result(
+            local_file_list=txt_file_list,
+            cloud_file_list=txt_file_list,
+            local_trash_list=[],
+            cloud_trash_list=txt_file_list,
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
-        test_support_instance.create_file('txt', "local", txt_1_name)
-        test_support_instance.create_file('txt', "local", txt_2_name)
-        test_support_instance.create_file('txt', "local", txt_3_name)
-        test_support_instance.create_file('png', "cloud", png_1_name)
-        test_support_instance.create_file('png', "cloud", png_2_name)
-        test_support_instance.create_file('png', "cloud", png_3_name)
+    def test_command_pus_online_encrypted(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        encrypted_txt_file_list = ["/bF8xLnR4dA==", "/bGZfMQ==/bF8yLnR4dA==", "/bGZfMg==/bGZfMjI=/bF8zLnR4dA=="]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_push(Mode.ENCRYPTED, txt_file_list, png_file_list)
+        command_push.command_push(offline=False)
+        verify_action_result(
+            local_file_list=txt_file_list,
+            cloud_file_list=encrypted_txt_file_list,
+            local_trash_list=[],
+            cloud_trash_list=txt_file_list,
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
-        command_push.command_push(False)
-
-        # verify cloud files
-        cloud_file_meta_list = index_facade.get_cloud_index(test_support_instance.get_mock_cloud_vpath())
-        cloud_files_path_list = [value[QueueItem.KEY_MIDDLE_PATH] for value in cloud_file_meta_list.values()]
-        logger_instance.log_debug("file in cloud", str(cloud_files_path_list))
-        assert len(cloud_file_meta_list) == 3
-        assert txt_1_name in cloud_files_path_list
-        assert txt_2_name in cloud_files_path_list
-        assert txt_3_name in cloud_files_path_list
-
-        # verify local files
-        local_file_meta_list = index_facade.get_local_index(test_support_instance.get_mock_local_vpath())
-        local_files_path_list = [value[QueueItem.KEY_MIDDLE_PATH] for value in local_file_meta_list.values()]
-        logger_instance.log_debug("file in local", str(local_files_path_list))
-        assert len(local_file_meta_list) == 3
-        assert txt_1_name in local_files_path_list
-        assert txt_2_name in local_files_path_list
-        assert txt_3_name in local_files_path_list
-
-        # verify local trash
-        local_trash_folder_vpath = test_support_instance.get_local_trash_folder_vpath()
-        local_trash_file_meta_fist = index_facade.get_local_index(local_trash_folder_vpath)
-        assert len(local_trash_file_meta_fist) == 0
-        # verify buffer folder
-        local_buffer_folder_vpath = test_support_instance.get_local_buffer_folder_vpath()
-        local_buffer_file_meta_fist = index_facade.get_local_index(local_buffer_folder_vpath)
-        assert len(local_buffer_file_meta_fist) == 0
-        # verify cloud trash
-        cloud_trash_folder_vpath = test_support_instance.get_cloud_trash_folder_vpath()
-        cloud_trash_file_meta_fist = test_support.list_file_recursion_with_hidden(cloud_trash_folder_vpath)
-        logger_instance.log_debug("file in cloud trash",  str(cloud_trash_file_meta_fist))
-        assert len(cloud_trash_file_meta_fist) == 3
-        
-        # verify message queue
-        assert queue_instance.is_lock() == False 
-        assert queue_instance.is_queue_empty() == True
-
-        # assert log file
-        assert file_support.is_local_exist(logger_instance.get_log_error_file_vpath()) == False
-        assert test_support.count_lines_in_file(logger_instance.get_log_success_file_vpath()) == 6
-
-        # input("Press Enter to continue...")
-
-        
-    # @patch('os.getcwd')
-    # def test_command_push_encrypted(self, mock_getcwd):
-    #     # mocking
-    #     mock_getcwd.return_value = test_support_instance.get_mock_local_test_vpath()
-    #     run_command_init(TestSupport.encrypted_fgit_mode)
-    #     create_file_in_remote(test_support_instance.get_test_file_txt_1_local_vpath(), test_support_instance.get_test_file_txt_1_cloud_vpath(), "txt")
-    #     create_file_in_remote(test_support_instance.get_test_file_txt_2_local_vpath(), test_support_instance.get_test_file_txt_2_cloud_vpath(), "txt")
-    #     create_file_in_remote(test_support_instance.get_test_file_txt_3_local_vpath(), test_support_instance.get_test_file_txt_3_cloud_vpath(), "txt")
-    #     create_image(1, test_support_instance.get_test_file_png_1_local_vpath())
-    #     create_image(1, test_support_instance.get_test_file_png_2_local_vpath())
-    #     create_image(1, test_support_instance.get_test_file_png_3_local_vpath())
-
-    #     Hooks.base_hook()
-    #     Hooks.clean_trash()
-    #     command_push.command_push()
-
-    #     queue_instance.read_queue()
-    #     today_ymd = time_support.get_time_with_ymd()
-    #     current_action_folder_name = support.fgit_support.get_action_folder_name("push")
-
-    #     local_today_trash_folder_path = file_support.merge_vpath(FilegitConstant.trash_folder_vpath, today_ymd)
-    #     remote_today_trash_folder_path = file_support.merge_vpath(FilegitConfig.get_remote_vpath(), ".trash", today_ymd)
-    #     current_action_folder_path = file_support.merge_vpath(FilegitConstant.action_folder_vpath, current_action_folder_name)
-        
-    #     local_log_folder_path = file_support.merge_vpath(current_action_folder_path, "log")
-    #     success_log_file_path = file_support.merge_vpath(local_log_folder_path, "success.log")
-    #     error_log_file_path = file_support.merge_vpath(local_log_folder_path, "error.log")
-        
-    #     # assert local files
-    #     assert count_file(test_support_instance.get_mock_local_test_vpath()) == 3
-    #     # asert cloud files
-    #     assert len(index_facade.get_cloud_index(FilegitConfig.get_remote_vpath())) == 3
-    #     # assert local trash    
-    #     assert count_file(local_today_trash_folder_path) == 0
-    #     # assert remote trash
-    #     res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
-    #     assert len(res) == 3
-    #     # assert buffer folder
-    #     assert count_file(FilegitConstant.buffer_folder_vpath) == 0
-
-    #     # assert queue.json
-    #     assert queue_instance.get_virtual_action_folder() == None
-    #     assert queue_instance.is_lock() == False
-    #     assert len(queue_instance.get_key_set()) == 0
-    #     assert len(queue_instance.get_queue_item()) == 0
-        
-    #     # assert log file
-    #     assert file_support.is_local_exist(error_log_file_path) == False
-    #     assert count_lines_in_file(success_log_file_path) == 6
+    def test_command_pus_offline_encrypted(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        encrypted_txt_file_list = ["/bF8xLnR4dA==", "/bGZfMQ==/bF8yLnR4dA==", "/bGZfMg==/bGZfMjI=/bF8zLnR4dA=="]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_push(Mode.ENCRYPTED, txt_file_list, png_file_list)
+        remote_json_content = {
+            "637772eb0c3dc923a5fe1a5bc7c1fae9": {"middle_path": "/Y18xLnBuZw==", "size": 1048576},
+            "1c32dc70c6f1f445b7422d2e72d1c575": {"middle_path": "/Y2ZfMQ==/Y18yLnBuZw==", "size": 1048576},
+            "0497a49c66bf337994c3b9afdddd0bc3": {"middle_path": "/Y2ZfMg==/Y2ZfMjI=/Y18zLnBuZw==", "size": 1048576 }
+        }
+        file_support.real_write_json_file(fgit_instance.get_cloud_index_file_vpath(test_support_instance.get_mock_local_vpath()), remote_json_content)
+        command_push.command_push(offline=True)
+        verify_action_result(
+            local_file_list=txt_file_list,
+            cloud_file_list=encrypted_txt_file_list,
+            local_trash_list=[],
+            cloud_trash_list=txt_file_list,
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
     # after each function
     def tearDown(self):
         bdwp_instance.delete_file_folder(test_support_instance.get_mock_cloud_vpath())
         file_support.real_delete_local_path(test_support_instance.get_mock_local_vpath())
+
+
+def prepare_push(mode:Mode, txt_file_list, png_file_list):
+    # local path: ./uttest/tmp/local/test_fgit
+    # cloud path: ./uttest/tmp/cloud/test_fgit
+    command_init(mode=mode, local_vpath=test_support_instance.get_mock_local_vpath(), remote_vpath=test_support_instance.get_mock_cloud_vpath())
+    for txt_file in txt_file_list:
+        test_support_instance.create_file('txt', "local", txt_file, mode)
+    for png_file in png_file_list:
+        test_support_instance.create_file('png', "cloud", png_file, mode)
+
+def verify_action_result(local_file_list=[], cloud_file_list=[], local_trash_list=[], cloud_trash_list=[], buffer_file_list=[], success_log_length=0):
+    # verify cloud files
+    cloud_file_meta_list = index_facade.get_cloud_index(test_support_instance.get_mock_cloud_vpath())
+    cloud_files_path_list = [value[QueueItem.KEY_MIDDLE_PATH] for value in cloud_file_meta_list.values()]
+    logger_instance.log_debug("file in cloud", str(cloud_files_path_list))
+    assert len(cloud_file_meta_list) == len(cloud_file_list)
+    for txt_file in cloud_file_list:
+        assert txt_file in cloud_files_path_list
+
+    # verify local files
+    local_file_meta_list = index_facade.get_local_index(test_support_instance.get_mock_local_vpath())
+    local_files_path_list = [value[QueueItem.KEY_MIDDLE_PATH] for value in local_file_meta_list.values()]
+    logger_instance.log_debug("file in local", str(local_files_path_list))
+    assert len(local_file_meta_list) == len(local_file_list)
+    for txt_file in local_file_list:
+        assert txt_file in local_files_path_list
+
+    # verify local trash
+    local_trash_folder_vpath = test_support_instance.get_local_trash_folder_vpath()
+    local_trash_file_meta_fist = index_facade.get_local_index(local_trash_folder_vpath)
+    assert len(local_trash_file_meta_fist) == len(local_trash_list)
+    # verify buffer folder
+    local_buffer_folder_vpath = test_support_instance.get_local_buffer_folder_vpath()
+    local_buffer_file_meta_fist = index_facade.get_local_index(local_buffer_folder_vpath)
+    assert len(local_buffer_file_meta_fist) == len(buffer_file_list)
+    # verify cloud trash
+    cloud_trash_folder_vpath = test_support_instance.get_cloud_trash_folder_vpath()
+    cloud_trash_file_meta_fist = test_support.list_file_recursion_with_hidden(cloud_trash_folder_vpath)
+    logger_instance.log_debug("file in cloud trash",  str(cloud_trash_file_meta_fist))
+    assert len(cloud_trash_file_meta_fist) == len(cloud_trash_list)
+        
+    # verify message queue
+    assert queue_instance.is_lock() == False 
+    assert queue_instance.is_queue_empty() == True
+
+    # assert log file
+    assert file_support.is_local_exist(logger_instance.get_log_error_file_vpath()) == False
+    assert test_support.count_lines_in_file(logger_instance.get_log_success_file_vpath()) == success_log_length
+
+
+'''
+[DEBUG] 2025-03-01 19:15:18 test_command_push.py.verify_action_result file in cloud  ['/YkY4eExuUjRkQT09', '/YkdaZk1RPT0=/YkY4eUxuUjRkQT09', '/YkdaZk1nPT0=/YkdaZk1qST0=/YkY4ekxuUjRkQT09']
+[DEBUG] 2025-03-01 19:15:18 test_command_push.py.verify_action_result file in local  ['/bF8xLnR4dA==', '/bGZfMg==/bGZfMjI=/bF8zLnR4dA==', '/bGZfMQ==/bF8yLnR4dA==']
+'''

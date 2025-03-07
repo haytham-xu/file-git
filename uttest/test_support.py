@@ -2,13 +2,23 @@
 import os
 import string
 from PIL import Image
+from model.config import Mode
 
 from support import file_support
-from command.command_init import command_init
-from support import file_support
-# from support.file_support import CURRENT_VPAT
+from support import encrypt_support
+from model.logger import logger_instance
+
+'''
+["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+["/bF8xLnR4dA==", "/bGZfMQ==/bF8yLnR4dA==", "/bGZfMg==/bGZfMjI=/bF8zLnR4dA=="]
+["637772eb0c3dc923a5fe1a5bc7c1fae9", "1c32dc70c6f1f445b7422d2e72d1c575", "0497a49c66bf337994c3b9afdddd0bc3"]
+["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+["/Y18xLnBuZw==", "/Y2ZfMQ==/Y18yLnBuZw==", "/Y2ZfMg==/Y2ZfMjI=/Y18zLnBuZw=="]
+["", "", ""]
+'''
 
 class TestSupport():
+    fgit_password = "default_password"
     test_folder_name = "test_fgit"
     test_file_txt_1_middle_vpath = "test_1.txt"
     test_file_txt_2_middle_vpath = "folder1/test_2.txt"
@@ -18,70 +28,62 @@ class TestSupport():
     test_file_png_3_middle_vpath = "folder2/folder22/test_3.png"
     mock_tmp_vpath = os.getcwd() + "/uttest/tmp"
 
-# os.getcwd --> ~/uttest/tmp/local/test_fgit
-# 
-
-    # def get_a(self):
-    #     return TestSupport.mock_tmp_vpath + "/cloud/test_fgit"
-        # return file_support.merge_vpath(file_support.get_current_vpath())
     def get_mock_cloud_vpath(self):
-        # return file_support.merge_vpath(self.get_a(), "cloud", TestSupport.test_folder_name)
         return TestSupport.mock_tmp_vpath + file_support.merge_vpath("cloud", TestSupport.test_folder_name)
     def get_mock_local_vpath(self):
-        return file_support.merge_vpath(file_support.get_current_vpath()) # "local", TestSupport.test_folder_name
+        return file_support.merge_vpath(file_support.get_current_vpath())
     def get_local_buffer_folder_vpath(self):
         return file_support.merge_vpath(self.get_mock_local_vpath(), ".fgit", "buffer")
     def get_local_trash_folder_vpath(self):
         return file_support.merge_vpath(self.get_mock_local_vpath(), ".fgit", "trash")
     def get_cloud_trash_folder_vpath(self):
         return file_support.merge_vpath(self.get_mock_cloud_vpath(), ".trash")
+    # def get_fgit_local_vpath(self):
+    #     return self.get_mock_local_vpath()
+    # def get_fgit_remote_vpath(self):
+    #     return self.get_mock_cloud_vpath()
+    # def get_fgit_app_id(self):
+    #     return os.getenv("BDWP_APP_ID", "")
+    # def get_fgit_secret_key(self):
+    #     return os.getenv("BDWP_SECRET_KEY", "")
+    # def get_fgit_app_key(self):
+    #     return os.getenv("BDWP_APP_KEY", "")
+    # def get_fgit_sign_code(self):
+    #     return os.getenv("BDWP_SIGN_CODE", "")
+    # def get_fgit_expires_in(self):
+    #     return os.getenv("BDWP_EXPIRES_IN", "")
+    # def get_fgit_refresh_token(self):
+    #     return os.getenv("BDWP_REFRESH_TOKEN", "")
+    # def get_fgit_access_token(self):
+    #     return os.getenv("BDWP_ACCESS_TOKEN", "")
     
-    def create_file(self, type, localtion, file_middle_vpath):
-        base_vpath = self.get_mock_cloud_vpath() if "cloud" == localtion else self.get_mock_local_vpath()
-        file_output_vpath = file_support.merge_vpath(base_vpath, file_middle_vpath)
-        create_image(1, file_output_vpath) if "png" == type else create_file(1, file_output_vpath)
-
+    def create_file(self, type, localtion, file_middle_vpath, mode:Mode):
+        # local uncrypted -> 不加密
+        # cloud uncrypted -> 不加密
+        # local encrypted -> 不加密
+        # cloud encrypted -> 加密
+        base_vpath = ""
+        if "cloud" == localtion:
+            base_vpath = self.get_mock_cloud_vpath()
+        else: 
+            base_vpath = self.get_mock_local_vpath()
+        final_file_middle_vpath = file_middle_vpath
+        if mode == Mode.ENCRYPTED and "cloud" == localtion:
+            final_file_middle_vpath = encrypt_support.encode_path(file_middle_vpath)
+        file_output_vpath = file_support.merge_vpath(base_vpath, final_file_middle_vpath)
+        logger_instance.log_debug("creating in {}: {}".format(localtion, file_middle_vpath))
+        if "png" == type:
+            create_image(1, file_output_vpath, mode, localtion)
+        else:
+            create_file(1, file_output_vpath, mode, localtion)
+        
     
-    original_fgit_mode = "ORIGINAL"
-    encrypted_fgit_mode = "ENCRYPTED"
-    fgit_password = "default_password"
-    # fgit_local_vpath = self.get_mock_local_test_vpath()
-    # fgit_remote_vpath = self.get_mock_cloud_test_vpath()
-    # fgit_app_id = os.getenv("BDWP_APP_ID", "")
-    # fgit_secret_key = os.getenv("BDWP_SECRET_KEY", "")
-    # fgit_app_key = os.getenv("BDWP_APP_KEY", "")
-    # fgit_sign_code = os.getenv("BDWP_SIGN_CODE", "")
-    # fgit_expires_in = os.getenv("BDWP_EXPIRES_IN", "")
-    # fgit_refresh_token = os.getenv("BDWP_REFRESH_TOKEN", "")
-    # fgit_access_token = os.getenv("BDWP_ACCESS_TOKEN", "")
-    def get_fgit_local_vpath(self):
-        return self.get_mock_local_vpath()
-    def get_fgit_remote_vpath(self):
-        return self.get_mock_cloud_vpath()
-    def get_fgit_app_id(self):
-        return os.getenv("BDWP_APP_ID", "")
-    def get_fgit_secret_key(self):
-        return os.getenv("BDWP_SECRET_KEY", "")
-    def get_fgit_app_key(self):
-        return os.getenv("BDWP_APP_KEY", "")
-    def get_fgit_sign_code(self):
-        return os.getenv("BDWP_SIGN_CODE", "")
-    def get_fgit_expires_in(self):
-        return os.getenv("BDWP_EXPIRES_IN", "")
-    def get_fgit_refresh_token(self):
-        return os.getenv("BDWP_REFRESH_TOKEN", "")
-    def get_fgit_access_token(self):
-        return os.getenv("BDWP_ACCESS_TOKEN", "")
-    
-
 test_support_instance = TestSupport()
 
 
 def list_file_recursion_with_hidden(root_path):
     res = []
-
-    for root, dirs, files in os.walk(root_path):
-        # dirs[:] = [d for d in dirs if not is_hidden(d)]
+    for root, _, files in os.walk(root_path):
         for file in files:
             file_path = os.path.join(root, file)
             file_size = os.path.getsize(file_path)
@@ -92,21 +94,7 @@ def list_file_recursion_with_hidden(root_path):
             })
     return res
 
-# ----------------------------------------------------------------
-
-
-# fgit config
-# test_support_instance.get_fgit_local_vpath() = self.get_mock_local_test_vpath()
-# test_support_instance.get_fgit_remote_vpath() = self.get_mock_cloud_test_vpath()
-# test_support_instance.get_fgit_app_id() = os.getenv("BDWP_APP_ID", "")
-# test_support_instance.get_fgit_secret_key() = os.getenv("BDWP_SECRET_KEY", "")
-# test_support_instance.get_fgit_app_key() = os.getenv("BDWP_APP_KEY", "")
-# test_support_instance.get_fgit_sign_code() = os.getenv("BDWP_SIGN_CODE", "")
-# test_support_instance.get_fgit_expires_in() = os.getenv("BDWP_EXPIRES_IN", "")
-# test_support_instance.get_fgit_refresh_token() = os.getenv("BDWP_REFRESH_TOKEN", "")
-# test_support_instance.get_fgit_access_token() = os.getenv("BDWP_ACCESS_TOKEN", "")
-
-def create_file(size, output_vpath):
+def create_file(size, output_vpath, mode:Mode, localtion):
     """size is MB, store the file to the output."""
     size_in_bytes = size * 1024 * 1024  # convert MB to bytes
     chars = string.digits + string.ascii_lowercase + string.ascii_uppercase + " "
@@ -114,10 +102,18 @@ def create_file(size, output_vpath):
     _, virtual_parent_path = file_support.get_file_name_and_parent_vpath(output_vpath)
     file_support.create_local_folder(virtual_parent_path)
     file_support.real_write_file(output_vpath, repeated_chars)
-    # with open(output_vpath, 'w') as f:
-    #     f.write(repeated_chars)
+    if mode == Mode.ENCRYPTED and "cloud" == localtion:
+        buffer_file_vpath = output_vpath + "_buffer"
+        file_support.real_write_file(buffer_file_vpath, repeated_chars)
+        encrypt_support.encrypt_file(buffer_file_vpath, output_vpath, TestSupport.fgit_password)
+        file_support.real_delete_local_path(buffer_file_vpath)
+        logger_instance.log_debug("cloud encrypted file", output_vpath)
+        return
+    logger_instance.log_debug("unencrypted file", output_vpath)
+    file_support.real_write_file(output_vpath, repeated_chars)
+    
 
-def create_image(size, output_vpath):
+def create_image(size, output_vpath, mode:Mode, localtion):
     """Create an image with specified size in MB, and save to output_path."""
     size_in_bytes = size * 1024 * 1024  # convert MB to bytes
     num_pixels = size_in_bytes // 3  # each pixel is 3 bytes (RGB)
@@ -134,18 +130,25 @@ def create_image(size, output_vpath):
     # Ensure the image size matches the specified size
     _, virtual_parent_path = file_support.get_file_name_and_parent_vpath(output_vpath)
     file_support.create_local_folder(virtual_parent_path)
-    file_support.real_create_png(output_vpath, image, size_in_bytes)
-    # with open(output_vpath, 'wb') as f:
-    #     image.save(f, format='PNG')
-    #     current_size = f.tell()
-    #     if current_size < size_in_bytes:
-    #         f.write(b'\0' * (size_in_bytes - current_size))
+    if mode == Mode.ENCRYPTED and "cloud" == localtion:
+        buffer_file_vpath = output_vpath + "_buffer"
+        real_create_png(buffer_file_vpath, image, size_in_bytes)
+        encrypt_support.encrypt_file(buffer_file_vpath, output_vpath, TestSupport.fgit_password)
+        file_support.real_delete_local_path(buffer_file_vpath)
+        logger_instance.log_debug("cloud encrypted png", output_vpath)
+        return
+    logger_instance.log_debug("unencrypted png", output_vpath)
+    real_create_png(output_vpath, image, size_in_bytes)
 
-def run_command_init(fgit_mode):
-    command_init(fgit_mode, TestSupport.fgit_password, test_support_instance.get_fgit_local_vpath(), test_support_instance.get_fgit_remote_vpath(), test_support_instance.get_fgit_app_id(), test_support_instance.get_fgit_secret_key(), test_support_instance.get_fgit_app_key(), test_support_instance.get_fgit_sign_code(), test_support_instance.get_fgit_expires_in(), test_support_instance.get_fgit_refresh_token(), test_support_instance.get_fgit_access_token())
+def real_create_png(output_vpath, image, size_in_bytes):
+    file_rpath = file_support.convert_to_rpath(output_vpath)
+    with open(file_rpath, 'wb') as f:
+        image.save(f, format='PNG')
+        current_size = f.tell()
+        if current_size < size_in_bytes:
+            f.write(b'\0' * (size_in_bytes - current_size))
 
-# def run_command_clone(fgit_mode):
-#     command_clone(fgit_mode, fgit_password, fgit_local_vpath, fgit_remote_vpath, fgit_app_id, fgit_secret_key, fgit_app_key, fgit_sign_code, fgit_expires_in, fgit_refresh_token, fgit_access_token)
+
 
 # def create_file_in_remote(local_file_vpath, cloud_file_vpath, file_type, mode: Mode = Mode.ORIGINAL):
 #     if file_type == 'txt':
@@ -170,7 +173,7 @@ def run_command_init(fgit_mode):
 #     file_support.real_delete_local_path(local_file_vpath)
 
 def count_file(target_vpath):
-    target_real_path = file_support.real_local_path_convert(target_vpath)
+    target_real_path = file_support.convert_to_rpath(target_vpath)
     file_count = 0
     for _, dirnames, filenames in os.walk(target_real_path):
         dirnames[:] = [d for d in dirnames if not d.startswith('.')]
@@ -179,9 +182,16 @@ def count_file(target_vpath):
     return file_count
 
 def count_lines_in_file(file_vpath):
-    filet_real_path = file_support.real_local_path_convert(file_vpath)
+    filet_real_path = file_support.convert_to_rpath(file_vpath)
     line_count = 0
     with open(filet_real_path, 'r') as file:
         for _ in file:
             line_count += 1
     return line_count
+
+
+def get_path_hash(orginal_path:str):
+    pass
+
+def get_encrypted(orginal_path:str):
+    pass

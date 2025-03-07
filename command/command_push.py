@@ -13,7 +13,7 @@ from support import file_support
 action_name = "push"
 
 def command_push(offline=True):
-    logger_instance.log_debug("command_push is executing...", "mode", offline)
+    logger_instance.log_debug("command_push is executing...", "offline mode", offline)
     queue_instance.acquire_lock()
     local_vpath = file_support.get_current_vpath()
     fgit_instance.init_action(action_name)
@@ -28,6 +28,7 @@ def command_push(offline=True):
         file_support.real_write_json_file(fgit_instance.get_cloud_index_file_vpath(local_vpath), cloud_index_json)
 
     only_in_local_json = index_facade.get_only_in_local(local_index_json, cloud_index_json)
+    # todo: if encrypted mode, then the middle path in cloud_json is enctypted path not the source one. should decode. !!!!
     only_in_cloud_json = index_facade.get_only_in_remote(local_index_json, cloud_index_json)
     local_cloud_diff_json = index_facade.get_local_remote_diff(local_index_json, cloud_index_json)
 
