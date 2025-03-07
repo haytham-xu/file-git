@@ -28,7 +28,6 @@ def command_push(offline=True):
         file_support.real_write_json_file(fgit_instance.get_cloud_index_file_vpath(local_vpath), cloud_index_json)
 
     only_in_local_json = index_facade.get_only_in_local(local_index_json, cloud_index_json)
-    # todo: if encrypted mode, then the middle path in cloud_json is enctypted path not the source one. should decode. !!!!
     only_in_cloud_json = index_facade.get_only_in_remote(local_index_json, cloud_index_json)
     local_cloud_diff_json = index_facade.get_local_remote_diff(local_index_json, cloud_index_json)
 

@@ -8,15 +8,6 @@ from support import file_support
 from support import encrypt_support
 from model.logger import logger_instance
 
-'''
-["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
-["/bF8xLnR4dA==", "/bGZfMQ==/bF8yLnR4dA==", "/bGZfMg==/bGZfMjI=/bF8zLnR4dA=="]
-["637772eb0c3dc923a5fe1a5bc7c1fae9", "1c32dc70c6f1f445b7422d2e72d1c575", "0497a49c66bf337994c3b9afdddd0bc3"]
-["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
-["/Y18xLnBuZw==", "/Y2ZfMQ==/Y18yLnBuZw==", "/Y2ZfMg==/Y2ZfMjI=/Y18zLnBuZw=="]
-["", "", ""]
-'''
-
 class TestSupport():
     fgit_password = "default_password"
     test_folder_name = "test_fgit"
@@ -38,24 +29,6 @@ class TestSupport():
         return file_support.merge_vpath(self.get_mock_local_vpath(), ".fgit", "trash")
     def get_cloud_trash_folder_vpath(self):
         return file_support.merge_vpath(self.get_mock_cloud_vpath(), ".trash")
-    # def get_fgit_local_vpath(self):
-    #     return self.get_mock_local_vpath()
-    # def get_fgit_remote_vpath(self):
-    #     return self.get_mock_cloud_vpath()
-    # def get_fgit_app_id(self):
-    #     return os.getenv("BDWP_APP_ID", "")
-    # def get_fgit_secret_key(self):
-    #     return os.getenv("BDWP_SECRET_KEY", "")
-    # def get_fgit_app_key(self):
-    #     return os.getenv("BDWP_APP_KEY", "")
-    # def get_fgit_sign_code(self):
-    #     return os.getenv("BDWP_SIGN_CODE", "")
-    # def get_fgit_expires_in(self):
-    #     return os.getenv("BDWP_EXPIRES_IN", "")
-    # def get_fgit_refresh_token(self):
-    #     return os.getenv("BDWP_REFRESH_TOKEN", "")
-    # def get_fgit_access_token(self):
-    #     return os.getenv("BDWP_ACCESS_TOKEN", "")
     
     def create_file(self, type, localtion, file_middle_vpath, mode:Mode):
         # local uncrypted -> 不加密
@@ -76,10 +49,8 @@ class TestSupport():
             create_image(1, file_output_vpath, mode, localtion)
         else:
             create_file(1, file_output_vpath, mode, localtion)
-        
     
 test_support_instance = TestSupport()
-
 
 def list_file_recursion_with_hidden(root_path):
     res = []
@@ -111,7 +82,6 @@ def create_file(size, output_vpath, mode:Mode, localtion):
         return
     logger_instance.log_debug("unencrypted file", output_vpath)
     file_support.real_write_file(output_vpath, repeated_chars)
-    
 
 def create_image(size, output_vpath, mode:Mode, localtion):
     """Create an image with specified size in MB, and save to output_path."""
@@ -148,30 +118,6 @@ def real_create_png(output_vpath, image, size_in_bytes):
         if current_size < size_in_bytes:
             f.write(b'\0' * (size_in_bytes - current_size))
 
-
-
-# def create_file_in_remote(local_file_vpath, cloud_file_vpath, file_type, mode: Mode = Mode.ORIGINAL):
-#     if file_type == 'txt':
-#         create_file(1, local_file_vpath)
-#     elif file_type == 'png':
-#         create_image(1, local_file_vpath)
-#     else:
-#         raise ValueError("Unsupported file type")
-    
-#     file_middle_vpath = local_file_vpath.removeprefix(local_test_root_folder_vpath)
-#     file_vpath_in_local = file_support.merge_vpath(local_test_root_folder_vpath, file_middle_vpath)
-#     file_vpath_in_buffer = buffer_service.get_file_buffer_path(local_buffer_folder_vpath, file_middle_vpath)
-
-#     file_vpath_in_remote = None
-#     if mode == Mode.ENCRYPTED:
-#         file_vpath_in_remote = file_support.merge_vpath(cloud_test_folder_root_vpath, encrypt_support.encode_path(file_middle_vpath))
-#     else:
-#         file_vpath_in_remote = file_support.merge_vpath(cloud_test_folder_root_vpath, file_middle_vpath)
-#     buffer_service.move_to_buffer(file_vpath_in_local, local_test_root_folder_vpath, local_buffer_folder_vpath, mode, fgit_password)
-#     file_service.upload_file(file_vpath_in_buffer, file_vpath_in_remote)
-#     buffer_service.post_move_to_buffer(file_vpath_in_buffer)
-#     file_support.real_delete_local_path(local_file_vpath)
-
 def count_file(target_vpath):
     target_real_path = file_support.convert_to_rpath(target_vpath)
     file_count = 0
@@ -189,9 +135,76 @@ def count_lines_in_file(file_vpath):
             line_count += 1
     return line_count
 
-
 def get_path_hash(orginal_path:str):
-    pass
+    return file_support.get_string_hash(orginal_path)
 
 def get_encrypted(orginal_path:str):
-    pass
+    return encrypt_support.encode_path(orginal_path)
+
+
+# -----------------------------------
+
+
+from command.command_init import command_init
+
+from facade import index_facade
+from facade.queue_facade import queue_instance
+
+from model.queue import QueueItem
+from model.logger import logger_instance
+
+from support import file_support
+
+from uttest.test_support import test_support_instance
+from uttest import test_support
+from model.config import Mode
+
+def prepare_action(mode:Mode, txt_file_list, png_file_list):
+    # local path: ./uttest/tmp/local/test_fgit
+    # cloud path: ./uttest/tmp/cloud/test_fgit
+    command_init(mode=mode, local_vpath=test_support_instance.get_mock_local_vpath(), remote_vpath=test_support_instance.get_mock_cloud_vpath())
+    for txt_file in txt_file_list:
+        test_support_instance.create_file('txt', "local", txt_file, mode)
+    for png_file in png_file_list:
+        test_support_instance.create_file('png', "cloud", png_file, mode)
+        
+def verify_action_result(local_file_list=[], cloud_file_list=[], local_trash_list=[], cloud_trash_list=[], buffer_file_list=[], success_log_length=0):
+    # verify cloud files
+    cloud_file_meta_list = index_facade.get_cloud_index(test_support_instance.get_mock_cloud_vpath())
+    cloud_files_path_list = [value[QueueItem.KEY_MIDDLE_PATH] for value in cloud_file_meta_list.values()]
+    logger_instance.log_debug("file in cloud", str(cloud_files_path_list))
+    assert len(cloud_file_meta_list) == len(cloud_file_list)
+    for txt_file in cloud_file_list:
+        assert txt_file in cloud_files_path_list
+
+    # verify local files
+    local_file_meta_list = index_facade.get_local_index(test_support_instance.get_mock_local_vpath())
+    local_files_path_list = [value[QueueItem.KEY_MIDDLE_PATH] for value in local_file_meta_list.values()]
+    logger_instance.log_debug("file in local", str(local_files_path_list))
+    assert len(local_file_meta_list) == len(local_file_list)
+    for txt_file in local_file_list:
+        assert txt_file in local_files_path_list
+
+    # verify local trash
+    local_trash_folder_vpath = test_support_instance.get_local_trash_folder_vpath()
+    local_trash_file_meta_fist = index_facade.get_local_index(local_trash_folder_vpath)
+    assert len(local_trash_file_meta_fist) == len(local_trash_list)
+    # verify buffer folder
+    local_buffer_folder_vpath = test_support_instance.get_local_buffer_folder_vpath()
+    local_buffer_file_meta_fist = index_facade.get_local_index(local_buffer_folder_vpath)
+    assert len(local_buffer_file_meta_fist) == len(buffer_file_list)
+    # verify cloud trash
+    cloud_trash_folder_vpath = test_support_instance.get_cloud_trash_folder_vpath()
+    cloud_trash_file_meta_fist = test_support.list_file_recursion_with_hidden(cloud_trash_folder_vpath)
+    logger_instance.log_debug("file in cloud trash",  str(cloud_trash_file_meta_fist))
+    assert len(cloud_trash_file_meta_fist) == len(cloud_trash_list)
+        
+    # verify message queue
+    assert queue_instance.is_lock() == False 
+    assert queue_instance.is_queue_empty() == True
+
+    # assert log file
+    assert file_support.is_local_exist(logger_instance.get_log_error_file_vpath()) == False
+    assert test_support.count_lines_in_file(logger_instance.get_log_success_file_vpath()) == success_log_length
+
+

@@ -10,8 +10,6 @@ from cryptography.hazmat.primitives import padding
 from support import file_support
 from model.logger import logger_instance
 
-import threading
-
 def encode_path(source_vpath):
     vpath_segments = source_vpath.split("/")
     virtual_encoded_segments = [base64.urlsafe_b64encode(segment.encode()).decode() for segment in vpath_segments]
@@ -19,7 +17,6 @@ def encode_path(source_vpath):
     logger_instance.log_debug("encoding path: {} --> {}".format(source_vpath, encoded_path))
     return encoded_path
                               
-
 def decode_path(source_vpath):
     encoded_virtual_segments = source_vpath.split("/")
     decoded_virtual_segments = [base64.urlsafe_b64decode(segment.encode()).decode() for segment in encoded_virtual_segments]

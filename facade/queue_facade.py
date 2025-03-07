@@ -70,54 +70,40 @@ class QueueManager:
         retries = 0
         while retries < FilegitConstant.MAX_RETRIES:
             try:
-                mode = config_instance.get_mode()
                 file_source_middle_vpath = a_queue_item.get_middle_vpath()
-                # local_root_vpath = file_support.get_current_vpath()
                 local_root_vpath = config_instance.get_local_vpath()
                 buffer_root_vpath = fgit_instance.get_buffer_folder_vpath(local_root_vpath)
                 cloud_root_vpath = config_instance.get_remote_vpath()
-                # file_local_vpath = file_support.merge_vpath(config_instance.get_local_vpath(), file_source_middle_vpath)
                 file_local_middle_vpath = file_source_middle_vpath
                 file_buffer_middle_vpath = buffer_service.get_buffer_cloud_middle_path_base_mode(file_source_middle_vpath)
                 file_cloud_middle_vpath = buffer_service.get_buffer_cloud_middle_path_base_mode(file_source_middle_vpath)
-                # file_vpath_in_buffer = buffer_service.get_file_buffer_path(fgit_instance.get_buffer_folder_vpath(local_root_vpath), a_queue_item.get_middle_vpath())
-                # file_cloud_vpath_for_local_use = buffer_service.get_file_cloud_path_for_local_use(config_instance.get_remote_vpath(), a_queue_item.get_middle_vpath())
-                # file_vpath_in_remote_for_cloud_use = buffer_service.get_file_cloud_path_for_cloud_use(config_instance.get_remote_vpath(), a_queue_item.get_middle_vpath())
                 if a_queue_item.get_action() == Action.DOWNLOAD:
                     # step 1: download file from cloud to buffer
                     logger_instance.log_debug("processing-2 downloading")
-                    # source_file_vpath_in_buffer = file_support.merge_vpath(fgit_instance.get_buffer_folder_vpath(local_root_vpath), a_queue_item.get_middle_vpath())
-                    # file_service.download_file(file_cloud_vpath_for_local_use, source_file_vpath_in_buffer)
-                    file_service.download_file(cloud_root_vpath=cloud_root_vpath, cloud_middle_vpath=file_cloud_middle_vpath, buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath)
+                    file_service.download_file(cloud_root_vpath=cloud_root_vpath, cloud_middle_vpath=file_cloud_middle_vpath,
+                                               buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath)
                     # step 2: move file from buffer to local
-                    # buffer_service.move_to_local(source_file_vpath_in_buffer)
-                    buffer_service.move_to_local(buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath, local_root_vpath=local_root_vpath, local_middle_vpath=file_local_middle_vpath)
+                    buffer_service.move_to_local(buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath,
+                                                 local_root_vpath=local_root_vpath, local_middle_vpath=file_local_middle_vpath)
                     # step 3: post move to local
-                    # buffer_service.post_move_to_local(source_file_vpath_in_buffer)
                     buffer_service.post_move_to_local(buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath)
                 elif a_queue_item.get_action() == Action.UPLOAD:
                     logger_instance.log_debug("processing-2 uploading")
-                    # buffer_service.move_to_buffer(file_local_middle_vpath, local_root_vpath, fgit_instance.get_buffer_folder_vpath(local_root_vpath), config_instance.get_mode(), config_instance.get_password())
                     buffer_service.move_to_buffer(local_root_vpath=local_root_vpath, local_middle_vpath=file_local_middle_vpath,
                                                   buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath)
                     # logger_instance.log_debug("uploading-4 - already move to buffer")
-                    # file_service.upload_file(file_vpath_in_buffer, file_vpath_in_remote_for_cloud_use)
                     file_service.upload_file(buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath,
                                              cloud_root_vpath=cloud_root_vpath, cloud_middle_vpath=file_cloud_middle_vpath)
                     # logger_instance.log_debug("uploading-5 - prepare uploading")
-                    # buffer_service.post_move_to_buffer(file_vpath_in_buffer)
                     buffer_service.post_move_to_buffer(buffer_root_vpath = buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath)
                 elif a_queue_item.get_action() == Action.LOCAL_DELETE:
                     logger_instance.log_debug("processing-2 local deleting")
-                    # trash_service.local_move_to_trash(file_local_middle_vpath)
                     trash_service.local_move_to_trash(local_root_vpath=local_root_vpath, local_middle_vpath=file_local_middle_vpath)
                 elif a_queue_item.get_action() == Action.REMOTE_DELETE:
                     logger_instance.log_debug("processing-2 remote deleting")
-                    # trash_service.remote_move_to_trash(file_support.merge_vpath(config_instance.get_remote_vpath(), a_queue_item.get_middle_vpath()))
                     trash_service.remote_move_to_trash(cloud_root_vpath=cloud_root_vpath, cloud_middle_vpath=file_cloud_middle_vpath)
                 elif a_queue_item.get_action() == Action.ONLY_ENCRYPTED:
                     logger_instance.log_debug("processing-2 only encrypting")
-                    # buffer_service.move_to_buffer(file_local_middle_vpath)
                     buffer_service.move_to_buffer(local_root_vpath=local_root_vpath, local_middle_vpath=file_local_middle_vpath, buffer_root_vpath=buffer_root_vpath, buffer_middle_vpath=file_buffer_middle_vpath)
                 else:
                     pass

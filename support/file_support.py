@@ -31,7 +31,6 @@ def merge_convert_vpath(*path_segments):
     merged_path = merge_vpath(*path_segments)
     return convert_to_vpath(merged_path)
 
-
 # real json/yaml operation
 # ---------------------------------------------------------------------------------------
 def real_read_json_file(file_vpath):
@@ -63,7 +62,6 @@ def real_append_file(vpath, content):
     
 # virtual path operation
 # ---------------------------------------------------------------------------------------
-
 def get_current_vpath():
     real_current_path = os.getcwd()
     normalized_path = os.path.normpath(real_current_path)
@@ -113,7 +111,6 @@ def create_local_folder(rpath):
         real_path = convert_to_rpath(rpath)
         os.makedirs(real_path, exist_ok=True)
         time.sleep(5)
-        
 
 def real_check_and_create_parent_folder(vpath):
     real_path = convert_to_rpath(vpath)
