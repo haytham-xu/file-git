@@ -20,12 +20,13 @@ def move_to_local(buffer_root_vpath:str, buffer_middle_vpath:str, local_root_vpa
         encrypt_support.decrypt_file(buffer_file_rpath, file_local_rpath, config_instance.get_password())
     else:
         file_support.real_move_file_folder(buffer_file_rpath, file_local_rpath)
+    logger_instance.log_debug("Move To Local: {} {}".format(buffer_middle_vpath, local_middle_vpath))
 
 def post_move_to_local(buffer_root_vpath:str, buffer_middle_vpath:str):
     buffer_file_rpath = file_support.merge_convert_rpath(buffer_root_vpath, buffer_middle_vpath)
     file_support.real_delete_local_path(buffer_file_rpath)
     file_support.local_delete_empty_parent_folders(buffer_file_rpath)
-
+    logger_instance.log_debug("Post Move To Local delete: {}".format(buffer_middle_vpath))
 
 def move_to_buffer(local_root_vpath:str, local_middle_vpath:str, buffer_root_vpath:str, buffer_middle_vpath:str):
     local_file_rpath = file_support.merge_convert_rpath(local_root_vpath, local_middle_vpath)
@@ -34,6 +35,7 @@ def move_to_buffer(local_root_vpath:str, local_middle_vpath:str, buffer_root_vpa
         encrypt_support.encrypt_file(local_file_rpath, buffer_file_rpath, config_instance.get_password())
     else:
         file_support.real_copy_file_folder(local_file_rpath, buffer_file_rpath)
+    logger_instance.log_debug("Move To Buffer: {} {}".format(local_middle_vpath, buffer_middle_vpath))
 
 
 def post_move_to_buffer(buffer_root_vpath:str, buffer_middle_vpath:str):

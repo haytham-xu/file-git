@@ -2,21 +2,19 @@
 import os
 import string
 from PIL import Image
-from model.config import Mode
 
-from support import file_support
-from support import encrypt_support
+from command.command_init import command_init
+from facade import index_facade
+from facade.queue_facade import queue_instance
+from model.config import Mode
+from model.queue import QueueItem
 from model.logger import logger_instance
+from support import encrypt_support
+from support import file_support
 
 class TestSupport():
     fgit_password = "default_password"
     test_folder_name = "test_fgit"
-    test_file_txt_1_middle_vpath = "test_1.txt"
-    test_file_txt_2_middle_vpath = "folder1/test_2.txt"
-    test_file_txt_3_middle_vpath = "folder2/folder22/test_3.txt"
-    test_file_png_1_middle_vpath = "test_1.png"
-    test_file_png_2_middle_vpath = "folder1/test_2.png"
-    test_file_png_3_middle_vpath = "folder2/folder22/test_3.png"
     mock_tmp_vpath = os.getcwd() + "/uttest/tmp"
 
     def get_mock_cloud_vpath(self):
@@ -31,10 +29,10 @@ class TestSupport():
         return file_support.merge_vpath(self.get_mock_cloud_vpath(), ".trash")
     
     def create_file(self, type, localtion, file_middle_vpath, mode:Mode):
-        # local uncrypted -> 不加密
-        # cloud uncrypted -> 不加密
-        # local encrypted -> 不加密
-        # cloud encrypted -> 加密
+        # local uncrypted -> uncrypted
+        # cloud uncrypted -> uncrypted
+        # local encrypted -> uncrypted
+        # cloud encrypted -> encrypted
         base_vpath = ""
         if "cloud" == localtion:
             base_vpath = self.get_mock_cloud_vpath()
@@ -78,9 +76,9 @@ def create_file(size, output_vpath, mode:Mode, localtion):
         file_support.real_write_file(buffer_file_vpath, repeated_chars)
         encrypt_support.encrypt_file(buffer_file_vpath, output_vpath, TestSupport.fgit_password)
         file_support.real_delete_local_path(buffer_file_vpath)
-        logger_instance.log_debug("cloud encrypted file", output_vpath)
+        logger_instance.log_debug("create encrypted file in cloud", output_vpath)
         return
-    logger_instance.log_debug("unencrypted file", output_vpath)
+    logger_instance.log_debug("create unencrypted file", output_vpath)
     file_support.real_write_file(output_vpath, repeated_chars)
 
 def create_image(size, output_vpath, mode:Mode, localtion):
@@ -142,27 +140,10 @@ def get_encrypted(orginal_path:str):
     return encrypt_support.encode_path(orginal_path)
 
 
-# -----------------------------------
-
-
-from command.command_init import command_init
-
-from facade import index_facade
-from facade.queue_facade import queue_instance
-
-from model.queue import QueueItem
-from model.logger import logger_instance
-
-from support import file_support
-
-from uttest.test_support import test_support_instance
-from uttest import test_support
-from model.config import Mode
-
 def prepare_action(mode:Mode, txt_file_list, png_file_list):
     # local path: ./uttest/tmp/local/test_fgit
     # cloud path: ./uttest/tmp/cloud/test_fgit
-    command_init(mode=mode, local_vpath=test_support_instance.get_mock_local_vpath(), remote_vpath=test_support_instance.get_mock_cloud_vpath())
+    command_init(mode=mode, local_vpath=test_support_instance.get_mock_local_vpath(), remote_vpath=test_support_instance.get_mock_cloud_vpath(), password=TestSupport.fgit_password)
     for txt_file in txt_file_list:
         test_support_instance.create_file('txt', "local", txt_file, mode)
     for png_file in png_file_list:
@@ -195,7 +176,7 @@ def verify_action_result(local_file_list=[], cloud_file_list=[], local_trash_lis
     assert len(local_buffer_file_meta_fist) == len(buffer_file_list)
     # verify cloud trash
     cloud_trash_folder_vpath = test_support_instance.get_cloud_trash_folder_vpath()
-    cloud_trash_file_meta_fist = test_support.list_file_recursion_with_hidden(cloud_trash_folder_vpath)
+    cloud_trash_file_meta_fist = list_file_recursion_with_hidden(cloud_trash_folder_vpath)
     logger_instance.log_debug("file in cloud trash",  str(cloud_trash_file_meta_fist))
     assert len(cloud_trash_file_meta_fist) == len(cloud_trash_list)
         
@@ -205,6 +186,6 @@ def verify_action_result(local_file_list=[], cloud_file_list=[], local_trash_lis
 
     # assert log file
     assert file_support.is_local_exist(logger_instance.get_log_error_file_vpath()) == False
-    assert test_support.count_lines_in_file(logger_instance.get_log_success_file_vpath()) == success_log_length
+    assert count_lines_in_file(logger_instance.get_log_success_file_vpath()) == success_log_length
 
 

@@ -58,10 +58,11 @@ def fake_delete_file_folder(cloud_folder_vpath):
     file_support.real_delete_local_path(cloud_folder_vpath)
 
 def fake_download_file_with_path(cloud_download_abs_rpath, local_download_abs_rpath):
-    print("Fake download file with path, end here!")
+    # print("Fake download file with path, end here!")
+    file_support.real_copy_file_folder(cloud_download_abs_rpath, local_download_abs_rpath)
 
 def fake_upload_file(local_upload_abs_rpath, cloud_upload_abs_rpath):
-    file_support.real_move_file_folder(local_upload_abs_rpath, cloud_upload_abs_rpath)
+    file_support.real_copy_file_folder(local_upload_abs_rpath, cloud_upload_abs_rpath)
 
 def fake_move_file_folder(cloud_source_file_rpath, cloud_target_folder_rpath):
     file_support.create_local_folder(cloud_target_folder_rpath)

@@ -77,19 +77,18 @@ cli.add_command(init)
 #     command_refresh_token()
 # cli.add_command(refresh_token)
 
-# @click.command()
-# def pull():
-#     """pull files from the remote repository."""
-#     Hooks.base_hook()
-#     Hooks.clean_trash()
-#     command_pull()
-# cli.add_command(pull)
+@click.command()
+@click.option('-o', '--offline', is_flag=True, help='Run in offline mode')
+def pull(offline):
+    """pull files from the remote repository."""
+    command_pull(offline = offline)
+cli.add_command(pull)
 
 @click.command()
 @click.option('-o', '--offline', is_flag=True, help='Run in offline mode')
 def push(offline):
     """push files to the remote repository."""
-    command_push(offline)
+    command_push(offline = offline)
 cli.add_command(push)
 
 # @click.command()

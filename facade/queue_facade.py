@@ -59,7 +59,7 @@ class QueueManager:
             while True:
                 message = self.redis_instance.brpop(QueueManager.KEY_MESSAGE_QUEUE, timeout=5)
                 if message == None:
-                    print("Queue is empty, exiting...")
+                    logger_instance.log_debug("Queue is empty, exiting...")
                     break
                 a_queue_item = QueueItem.from_string(message[1].decode('utf-8'))
                 executor.submit(self.process_message, a_queue_item)
@@ -111,7 +111,7 @@ class QueueManager:
                 break
             except Exception as e:
                 retries += 1
-                print(e)
+                # print(e)
                 logger_instance.log_error("fail {} times: ".format(retries) + a_queue_item.get_action(), file_local_middle_vpath, file_cloud_middle_vpath, e)
                 
         else:

@@ -35,8 +35,16 @@ class LoggerManager:
             file_support.real_create_local_file(self.log_error_file_vpath)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")    
         log_message = f"error {current_time} {action} {local_vpath} {remote_vpath}\n {error_track}\n\n"
-        print(log_message)
         file_support.real_append_file(self.log_error_file_vpath, log_message)
+
+        frame = inspect.currentframe().f_back
+        caller_file = os.path.basename(frame.f_globals["__file__"])
+        caller_function = frame.f_code.co_name
+
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        thread_id = threading.get_ident()
+        message = '  '.join([local_vpath, error_track])
+        print(f"[ERROR] {current_time} {caller_file}.{caller_function} || {thread_id} || {message}")
 
     def log_debug(self, *args):
         frame = inspect.currentframe().f_back

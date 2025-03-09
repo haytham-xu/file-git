@@ -1,141 +1,97 @@
 
-import support.fgit_support
-from uttest.abstract_test import AbstractBDWPTestCase
-from unittest.mock import patch
-
-from uttest import test_support
-from hook.hook import Hooks
-from command.command_set_config import command_set_config
-from model.config import FilegitConfig
-from support import file_support
-
-from support.bdwp_support import bdwp_instance
 from command import command_pull
+from model.file_git import fgit_instance
+from model.config import Mode
+from support import file_support
+from support.bdwp_support import bdwp_instance
 
+from uttest.abstract_test import AbstractBDWPTestCase
+from uttest.test_support import test_support_instance
+from uttest.test_support import get_path_hash, get_encrypted, verify_action_result, prepare_action
 
-from service import file_service
-from facade import index_facade
-from support import time_support
-from model.config import FilegitConfig
-from facade.queue_facade import queue_instance
-from model import constant
+# python3 -m unittest uttest.test_command_pull.TestCommandPull -v -f
+class TestCommandPull(AbstractBDWPTestCase):
 
-class TestCommandPush(AbstractBDWPTestCase):
-    
-    # before each function
+        # before each function
     def setUp(self):
-        bdwp_instance.set_access_token(test_support.test_support_instance.get_fgit_access_token())
-        bdwp_instance.create_folder(test_support.test_support_instance.get_mock_cloud_vpath())
-        file_support.create_local_folder(test_support.test_support_instance.get_mock_local_vpath())
+        bdwp_instance.create_folder(test_support_instance.get_mock_cloud_vpath())
+        file_support.create_local_folder(test_support_instance.get_mock_local_vpath())
 
-    @patch('os.getcwd')
-    def test_command_pull_original(self, mock_getcwd):
-        # mocking
-        mock_getcwd.return_value = test_support.test_support_instance.get_mock_local_vpath()
-        test_support.run_command_init(test_support.TestSupport.original_fgit_mode)
-        test_support.create_file_in_remote(test_support.test_support_instance.get_test_file_txt_1_local_vpath(), test_support.test_support_instance.get_test_file_txt_1_cloud_vpath(), "txt")
-        test_support.create_file_in_remote(test_support.test_support_instance.get_test_file_txt_2_local_vpath(), test_support.test_support_instance.get_test_file_txt_2_cloud_vpath(), "txt")
-        test_support.create_file_in_remote(test_support.test_support_instance.get_test_file_txt_3_local_vpath(), test_support.test_support_instance.get_test_file_txt_3_cloud_vpath(), "txt")
-        test_support.create_image(1, test_support.test_support_instance.get_test_file_png_1_local_vpath())
-        test_support.create_image(1, test_support.test_support_instance.get_test_file_png_2_local_vpath())
-        test_support.create_image(1, test_support.test_support_instance.get_test_file_png_3_local_vpath())
+    # python3 -m unittest uttest.test_command_pull.TestCommandPull.test_command_pull_online_original -v -f
+    def test_command_pull_online_original(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_action(Mode.ORIGINAL, txt_file_list, png_file_list)
+        command_pull.command_pull(offline=False)
+        verify_action_result(
+            local_file_list=png_file_list,
+            cloud_file_list=png_file_list,
+            local_trash_list=txt_file_list,
+            cloud_trash_list=[],
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
-        Hooks.base_hook()
-        Hooks.clean_trash()
-        command_pull.command_pull()
+    # python3 -m unittest uttest.test_command_pull.TestCommandPull.test_command_pull_offline_original -v -f
+    def test_command_pull_offline_original(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_action(Mode.ORIGINAL, txt_file_list, png_file_list)
+        remote_json_content = {
+            get_path_hash("/c_1.png"): {"middle_path": "/c_1.png", "size": 1048576},
+            get_path_hash("/cf_1/c_2.png"): {"middle_path": "/cf_1/c_2.png", "size": 1048576},
+            get_path_hash("/cf_2/cf_22/c_3.png"): {"middle_path": "/cf_2/cf_22/c_3.png", "size": 1048576 }
+        }
+        file_support.real_write_json_file(fgit_instance.get_cloud_index_file_vpath(test_support_instance.get_mock_local_vpath()), remote_json_content)
+        command_pull.command_pull(offline=True)
+        verify_action_result(
+            local_file_list=png_file_list,
+            cloud_file_list=png_file_list,
+            local_trash_list=txt_file_list,
+            cloud_trash_list=[],
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
-        queue_instance.read_queue()
-        today_ymd = time_support.get_time_with_ymd()
-        current_action_folder_name = support.fgit_support.get_action_folder_name("pull")
+    # python3 -m unittest uttest.test_command_pull.TestCommandPull.test_command_pull_online_encrypted -v -f
+    def test_command_pull_online_encrypted(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        encrypted_png_file_list = [get_encrypted("/c_1.png"),get_encrypted( "/cf_1/c_2.png"), get_encrypted("/cf_2/cf_22/c_3.png")]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_action(Mode.ENCRYPTED, txt_file_list, png_file_list)
+        command_pull.command_pull(offline=False)
+        verify_action_result(
+            local_file_list=png_file_list,
+            cloud_file_list=encrypted_png_file_list,
+            local_trash_list=txt_file_list,
+            cloud_trash_list=[],
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
-        local_today_trash_folder_path = file_support.merge_vpath(FilegitConstant.trash_folder_vpath, today_ymd)
-        remote_today_trash_folder_path = file_support.merge_vpath(FilegitConfig.get_remote_vpath(), ".trash", today_ymd)
-        current_action_folder_path = file_support.merge_vpath(FilegitConstant.action_folder_vpath, current_action_folder_name)
-        
-        local_log_folder_path = file_support.merge_vpath(current_action_folder_path, "log")
-        success_log_file_path = file_support.merge_vpath(local_log_folder_path, "success.log")
-        error_log_file_path = file_support.merge_vpath(local_log_folder_path, "error.log")
-
-        # assert local files
-        assert test_support.count_file(test_support.test_support_instance.get_mock_local_vpath()) == 3
-        # asert cloud files
-        assert len(index_facade.get_cloud_index(FilegitConfig.get_remote_vpath())) == 3
-        # assert local trash    
-        assert test_support.count_file(local_today_trash_folder_path) == 3
-        # assert remote trash
-        # file_service.
-        # res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
-        # assert len(res) == 0
-        assert file_service.cloud_is_file_exist(remote_today_trash_folder_path) == False
-        # assert buffer folder
-        assert test_support.count_file(FilegitConstant.buffer_folder_vpath) == 0
-
-        # assert queue.json
-        assert queue_instance.get_virtual_action_folder() == None
-        assert queue_instance.is_lock() == False
-        assert len(queue_instance.get_key_set()) == 0
-        assert len(queue_instance.get_queue_item()) == 0
-        
-        # assert log file
-        assert file_support.is_local_exist(error_log_file_path) == False
-        assert test_support.count_lines_in_file(success_log_file_path) == 6
-
-    @patch('os.getcwd')
-    def test_command_pull_encrypted(self, mock_getcwd):
-        # mocking
-        mock_getcwd.return_value = test_support.test_support_instance.get_mock_local_vpath()
-        
-        test_support.run_command_init(test_support.TestSupport.encrypted_fgit_mode)
-        test_support.create_file_in_remote(test_support.test_support_instance.get_test_file_txt_1_local_vpath(), test_support.test_support_instance.get_test_file_txt_1_cloud_vpath(), "txt")
-        test_support.create_file_in_remote(test_support.test_support_instance.get_test_file_txt_2_local_vpath(), test_support.test_support_instance.get_test_file_txt_2_cloud_vpath(), "txt")
-        test_support.create_file_in_remote(test_support.test_support_instance.get_test_file_txt_3_local_vpath(), test_support.test_support_instance.get_test_file_txt_3_cloud_vpath(), "txt")
-        test_support.create_image(1, test_support.test_support_instance.get_test_file_png_1_local_vpath())
-        test_support.create_image(1, test_support.test_support_instance.get_test_file_png_2_local_vpath())
-        test_support.create_image(1, test_support.test_support_instance.get_test_file_png_3_local_vpath())
-
-        Hooks.base_hook()
-        Hooks.clean_trash()
-        command_pull.command_pull()
-
-        # input("after command pull...")
-
-        queue_instance.read_queue()
-        today_ymd = time_support.get_time_with_ymd()
-        current_action_folder_name = support.fgit_support.get_action_folder_name("pull")
-
-        local_today_trash_folder_path = file_support.merge_vpath(FilegitConstant.trash_folder_vpath, today_ymd)
-        remote_today_trash_folder_path = file_support.merge_vpath(FilegitConfig.get_remote_vpath(), ".trash", today_ymd)
-        current_action_folder_path = file_support.merge_vpath(FilegitConstant.action_folder_vpath, current_action_folder_name)
-        
-        local_log_folder_path = file_support.merge_vpath(current_action_folder_path, "log")
-        success_log_file_path = file_support.merge_vpath(local_log_folder_path, "success.log")
-        error_log_file_path = file_support.merge_vpath(local_log_folder_path, "error.log")
-
-        # assert local files
-        assert test_support.count_file(test_support.test_support_instance.get_mock_local_vpath()) == 3
-        # asert cloud files
-        assert len(index_facade.get_cloud_index(FilegitConfig.get_remote_vpath())) == 3
-        # assert local trash    
-        assert test_support.count_file(local_today_trash_folder_path) == 3
-        # assert remote trash
-        # file_service.
-        # res = file_service.list_cloud_file_recursion(remote_today_trash_folder_path)
-        # assert len(res) == 0
-        assert file_service.cloud_is_file_exist(remote_today_trash_folder_path) == False
-        # assert buffer folder
-        assert test_support.count_file(FilegitConstant.buffer_folder_vpath) == 0
-
-        # assert queue.json
-        assert queue_instance.get_virtual_action_folder() == None
-        assert queue_instance.is_lock() == False
-        assert len(queue_instance.get_key_set()) == 0
-        assert len(queue_instance.get_queue_item()) == 0
-        
-        # assert log file
-        assert file_support.is_local_exist(error_log_file_path) == False
-        assert test_support.count_lines_in_file(success_log_file_path) == 6
+    # python3 -m unittest uttest.test_command_pull.TestCommandPull.test_command_pull_offline_encrypted -v -f
+    def test_command_pull_offline_encrypted(self):
+        txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
+        encrypted_png_file_list = [get_encrypted("/c_1.png"),get_encrypted( "/cf_1/c_2.png"), get_encrypted("/cf_2/cf_22/c_3.png")]
+        png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
+        prepare_action(Mode.ENCRYPTED, txt_file_list, png_file_list)
+        remote_json_content = {
+            get_path_hash("/c_1.png"): {"middle_path": get_encrypted("/c_1.png"), "size": 1048576},
+            get_path_hash("/cf_1/c_2.png"): {"middle_path": get_encrypted("/cf_1/c_2.png"), "size": 1048576},
+            get_path_hash("/cf_2/cf_22/c_3.png"): {"middle_path": get_encrypted("/cf_2/cf_22/c_3.png"), "size": 1048576 }
+        }
+        file_support.real_write_json_file(fgit_instance.get_cloud_index_file_vpath(test_support_instance.get_mock_local_vpath()), remote_json_content)
+        command_pull.command_pull(offline=True)
+        verify_action_result(
+            local_file_list=png_file_list,
+            cloud_file_list=encrypted_png_file_list,
+            local_trash_list=txt_file_list,
+            cloud_trash_list=[],
+            buffer_file_list=[],
+            success_log_length=6
+        )
 
     # after each function
     def tearDown(self):
-        bdwp_instance.delete_file_folder(test_support.test_support_instance.get_mock_cloud_vpath())
-        file_support.real_delete_local_path(test_support.test_support_instance.get_mock_local_vpath())
+        bdwp_instance.delete_file_folder(test_support_instance.get_mock_cloud_vpath())
+        file_support.real_delete_local_path(test_support_instance.get_mock_local_vpath())

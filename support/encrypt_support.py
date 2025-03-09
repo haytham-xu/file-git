@@ -60,6 +60,7 @@ def encrypt_file(file_vpath: str, output_vpath: str, password: str):
         f_out.write(encrypted_data)
 
 def decrypt_file(file_vpath: str, output_vpath: str, password: str):
+    logger_instance.log_debug("start decrypting file: {} --> {}".format(file_vpath, output_vpath))
     file_real_path = file_support.convert_to_rpath(file_vpath)
     output_real_path = file_support.convert_to_rpath(output_vpath)
     file_support.real_create_local_file(output_vpath)
@@ -82,3 +83,4 @@ def decrypt_file(file_vpath: str, output_vpath: str, password: str):
         padded_data = decryptor.finalize()
         data = unpadder.update(padded_data) + unpadder.finalize()
         f_out.write(data)
+    logger_instance.log_debug("decrypt file finished: {} --> {}".format(file_vpath, output_vpath))

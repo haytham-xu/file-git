@@ -1,32 +1,15 @@
 
 from command import command_push
-from command.command_init import command_init
-
-from facade import index_facade
-from facade.queue_facade import queue_instance
-
-from model.queue import QueueItem
-from model.logger import logger_instance
 from model.file_git import fgit_instance
-
+from model.config import Mode
 from support import file_support
 from support.bdwp_support import bdwp_instance
 
 from uttest.abstract_test import AbstractBDWPTestCase
 from uttest.test_support import test_support_instance
-from uttest import test_support
-from model.config import Mode
-
 from uttest.test_support import get_path_hash, get_encrypted, verify_action_result, prepare_action
 
-'''
-python3 -m unittest uttest.test_command_push.TestCommandPush -v -f
-
-python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_online_original -v -f
-python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_offline_original -v -f
-python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_online_encrypted -v -f
-python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_offline_encrypted -v -f
-'''
+# python3 -m unittest uttest.test_command_push.TestCommandPush -v -f
 class TestCommandPush(AbstractBDWPTestCase):
     
     # before each function
@@ -34,6 +17,7 @@ class TestCommandPush(AbstractBDWPTestCase):
         bdwp_instance.create_folder(test_support_instance.get_mock_cloud_vpath())
         file_support.create_local_folder(test_support_instance.get_mock_local_vpath())
 
+    # python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_online_original -v -f
     def test_command_push_online_original(self):
         txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
         png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
@@ -48,6 +32,7 @@ class TestCommandPush(AbstractBDWPTestCase):
             success_log_length=6
         )
 
+    # python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_offline_original -v -f
     def test_command_push_offline_original(self):
         txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
         png_file_list = ["/c_1.png", "/cf_1/c_2.png", "/cf_2/cf_22/c_3.png"]
@@ -68,6 +53,7 @@ class TestCommandPush(AbstractBDWPTestCase):
             success_log_length=6
         )
 
+    # python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_online_encrypted -v -f
     def test_command_push_online_encrypted(self):
         txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
         encrypted_txt_file_list = [get_encrypted("/l_1.txt"),get_encrypted( "/lf_1/l_2.txt"), get_encrypted("/lf_2/lf_22/l_3.txt")]
@@ -83,6 +69,7 @@ class TestCommandPush(AbstractBDWPTestCase):
             success_log_length=6
         )
 
+    # python3 -m unittest uttest.test_command_push.TestCommandPush.test_command_push_offline_encrypted -v -f
     def test_command_push_offline_encrypted(self):
         txt_file_list = ["/l_1.txt", "/lf_1/l_2.txt", "/lf_2/lf_22/l_3.txt"]
         encrypted_txt_file_list = [get_encrypted("/l_1.txt"),get_encrypted( "/lf_1/l_2.txt"), get_encrypted("/lf_2/lf_22/l_3.txt")]
